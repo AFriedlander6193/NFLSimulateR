@@ -2,21 +2,30 @@
 % Please edit documentation in R/SimulatorFunctions.R
 \name{depthchart}
 \alias{depthchart}
-\title{Returns the most updated depth chart for a selected NFL team}
+\title{Get the Most Updated NFL Depth Chart for a Team}
 \usage{
-depthchart(tm)
+get_depth_chart("NE")
+get_depth_chart("DAL")
 }
 \arguments{
-\item{team}{A two to three letter character string abbreviation for NFL teams
-Must be one of the following abbreviations:
-"ARI" "ATL" "BAL" "BUF" "CAR" "CHI" "CIN" "CLE" "DAL"
-"DEN" "DET" "GB"  "HOU" "IND" "JAX" "KC"  "LA"  "LAC"
-"LV"  "MIA" "MIN" "NE"  "NO"  "NYG" "NYJ" "PHI" "PIT"
-"SEA" "SF"  "TB"  "TEN" "WAS"}
+\item{team}{Character string. A two- or three-letter NFL team abbreviation.
+Must be one of the following:
+\code{"ARI"}, \code{"ATL"}, \code{"BAL"}, \code{"BUF"}, \code{"CAR"},
+\code{"CHI"}, \code{"CIN"}, \code{"CLE"}, \code{"DAL"}, \code{"DEN"},
+\code{"DET"}, \code{"GB"}, \code{"HOU"}, \code{"IND"}, \code{"JAX"},
+\code{"KC"}, \code{"LA"}, \code{"LAC"}, \code{"LV"}, \code{"MIA"},
+\code{"MIN"}, \code{"NE"}, \code{"NO"}, \code{"NYG"}, \code{"NYJ"},
+\code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
+\code{"TEN"}, \code{"WAS"}.}
 }
 \value{
-A data frame representation of the depth chart with each players position
+A \code{data.frame} representing the depth chart, including player names
+and their positions.
 }
 \description{
 Returns the most updated depth chart for a selected NFL team
+}
+\details{
+This function returns a depth chart (3 deep) for each position on
+offense and defense (not special teams).
 }
