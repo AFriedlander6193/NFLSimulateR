@@ -19,5 +19,4 @@ remotes::install_github("AFriedlander6193/NFLSimulator")
 - Generate realistic offensive and defensive personnel
 - Create route combinations and coverage schemes
 - Incorporate PFF player grades
-- Machine learning models for play selection
 - Bayesian models for play outcomes
