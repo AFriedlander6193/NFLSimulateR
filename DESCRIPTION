@@ -4,8 +4,7 @@ Version: 0.1.0
 Authors@R: 
     person("Aaron", "Friedlander", , "aaronfriedlandergradschool@gmail.com", role = c("aut", "cre"))
 Description: This package allows users to simulate NFL games.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Imports: 
@@ -16,7 +15,9 @@ Imports:
     nflreadr,
     nnet,
     brms,
-    MASS,
+    rlang,
+    stats,
+    tibble,
     stringr,
     rlist
 LazyData: true
