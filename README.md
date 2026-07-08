@@ -1,47 +1,50 @@
 # NFLSimulator
 
-`NFLSimulator` is an R package for simulating NFL games one play at a time using
-statistical models trained on historical NFL play-by-play and PFF player
-grading data. Rather than relying on fixed probabilities, the simulator models
-each stage of a play sequentially, producing realistic game outcomes that adapt
-to game situation, personnel, formations, coverages, and player ability.
+`NFLSimulator` is an R package for simulating NFL games one play at a time using statistical and machine learning models trained on historical NFL play-by-play and PFF player data.
+
+Rather than modeling an entire play with a single black-box model, **NFLSimulator** simulates each decision sequentially, conditioning every step on the game state and the decisions that preceded it. This produces realistic game simulations that account for personnel, formations, coverages, player ability, and game situation.
+
+---
 
 ## Installation
 
-### Prerequisites (Windows)
+### Windows Users
 
-If installing from source on Windows, make sure you have **Rtools45** (or the
-appropriate version for your version of R) installed.
+If installing from source on Windows, ensure that the appropriate version of **Rtools** is installed (e.g., **Rtools45** for recent versions of R).
 
-### Recommended
+### Recommended (`pak`)
 
 ```r
 install.packages("pak")
 pak::pak("AFriedlander6193/NFLSimulator")
 ```
 
-### Alternative
+### Alternative (`remotes`)
 
 ```r
 install.packages("remotes")
 remotes::install_github("AFriedlander6193/NFLSimulator")
 ```
 
+---
+
 ## Features
 
-- Simulate complete NFL games play-by-play.
-- Generate offensive and defensive personnel packages.
-- Predict offensive formations and defensive coverage schemes.
-- Simulate run/pass decisions conditioned on game state.
-- Generate realistic route combinations and targeted receivers.
-- Incorporate season-specific PFF player grades.
-- Simulate sacks, completions, interceptions, fumbles, and yards gained.
-- Built using statistical and machine learning models trained on historical NFL data.
+* Simulate complete NFL games play-by-play.
+* Simulate hundreds or thousands of games to estimate expected outcomes.
+* Generate realistic offensive and defensive personnel packages.
+* Predict offensive formations and defensive coverage schemes.
+* Simulate run/pass decisions conditioned on game situation.
+* Generate realistic route combinations and targeted receivers.
+* Incorporate season-specific PFF player grades into every play.
+* Simulate sacks, completions, interceptions, fumbles, and yards gained.
+* Built using Bayesian and gradient boosting (XGBoost) models trained on historical NFL data.
+
+---
 
 ## Simulation Pipeline
 
-Each play is simulated sequentially by conditioning each decision on the
-previous decisions.
+Every play is generated sequentially by conditioning each decision on previous decisions.
 
 ```text
 Game Situation
@@ -59,34 +62,97 @@ Offensive Formation
 Defensive Coverage
       │
       ▼
-Run / Pass
+Play Type (Run / Pass)
       │
       ▼
 Player Assignments
       │
       ▼
 Play Outcome
+      │
+      ▼
+Yards Gained
 ```
 
-## Example
+This sequential modeling framework allows the simulator to produce realistic play-by-play outcomes while accounting for both team tendencies and player ability.
+
+---
+
+## Quick Start
+
+Simulate a single NFL game:
 
 ```r
 library(NFLSimulator)
 
-offense <- full_PFF("KC", 2025)
-defense <- full_PFF("PHI", 2025)
-
-simulate_yards_gained(
-  posstm = "KC",
-  deftm = "PHI",
-  down = 1,
-  togo = 10,
-  YdsBef = 75,
-  posstmdiff = 0,
-  quarter_secs = 900,
-  quarter = 1,
-  off_dat = offense,
-  def_dat = defense,
+simulate_game(
+  team1 = "KC",
+  team2 = "PHI",
   year = 2025
 )
 ```
+
+Run many simulations of the same matchup:
+
+```r
+simulate_multiple_games(
+  team1 = "KC",
+  team2 = "PHI",
+  year = 2025,
+  n = 1000
+)
+```
+
+---
+
+## Advanced Usage
+
+In addition to full-game simulation, `NFLSimulator` exposes the individual components of the simulation engine for users who wish to build custom workflows or inspect intermediate decisions.
+
+Examples include:
+
+* Choosing offensive personnel
+* Choosing defensive personnel
+* Choosing offensive formations
+* Choosing defensive coverage
+* Choosing play type (run/pass)
+* Generating play details
+* Simulating play outcomes and yards gained
+
+These functions can be combined to build custom simulations or to study individual aspects of football strategy.
+
+---
+
+## Data Sources
+
+`NFLSimulator` uses publicly available NFL data together with PFF player grading data.
+
+Primary data sources include:
+
+* **nflverse**
+* **nflreadr**
+* **Pro Football Focus (PFF)**
+
+---
+
+## Citation
+
+If you use `NFLSimulator` in research or academic work, please cite the package using:
+
+```r
+citation("NFLSimulator")
+```
+
+---
+
+## Development Status
+
+`NFLSimulator` is under active development. Planned additions include:
+
+* Special teams simulation
+* Improved clock management
+* Additional Coaching decisions (timeouts, fourth downs, etc.)
+* `gganimate` visualizations for displaying simulated plays and football concepts
+* Expanded support for past NFL seasons
+* Weekly PFF updating for future seasons
+
