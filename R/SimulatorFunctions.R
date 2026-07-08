@@ -55,9 +55,10 @@ age_joiner <- function(pff_data){
 
 # Depth Chart Functions ----------------------------------------------
 
-#' Get the Most Updated NFL Depth Chart for a Team
+#' Get an NFL Team Depth Chart
 #'
-#' Returns the most updated depth chart for a selected NFL team
+#' Retrieves the most recent depth chart for an NFL team or the depth chart
+#' from a provided year and week
 #'
 #' @param tm Character string. A two- or three-letter NFL team abbreviation.
 #'   Must be one of the following:
@@ -68,22 +69,45 @@ age_joiner <- function(pff_data){
 #'   \code{"MIN"}, \code{"NE"}, \code{"NO"}, \code{"NYG"}, \code{"NYJ"},
 #'   \code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
 #'   \code{"TEN"}, \code{"WAS"}.
-#' @param year A year between 2024 and 2025
 #'
+#' @param year Numeric. Season year. Must be an integer between
+#'   \code{2022} and \code{2025}.
 #'
+#' @param week Numeric. Week of the regular season. Must be an integer
+#'   between \code{1} and \code{18}.
 #'
-#' @return A \code{data.frame} representing the depth chart, including player names
-#'   and their positions.
+#' @return A data.frame with one row per player on the team's depth chart.
+#' \describe{
+#'   \item{position}{Position from the official NFL depth chart.}
+#'   \item{player}{Player name.}
+#'   \item{depth_team}{Depth chart rank at the position (1 = starter).}
+#'   \item{final_position}{Simplified position category used by the simulator.}
+#'   \item{pff_id}{Unique PFF player identifier.}
+#' }
 #'
-#' @details This function returns a depth chart (3 deep) for each position on
-#' offense and defense (not special teams).
+#' @details
+#' Returns the offensive and defensive depth chart (up to three players per
+#' position) for the specified team and week. Special teams positions are
+#' excluded.
 #'
 #'
 #' @export
-depthchart <- function(tm, year){
+depthchart <- function(tm, year = 2025, week = 1){
+
+  game_dates <- c(
+    "-09-04", "-09-11", "-09-18", "-09-25",
+    "-10-02", "-10-09", "-10-16", "-10-23",
+    "-10-30", "-11-06", "-11-13", "-11-20",
+    "-11-27", "-12-04", "-12-11", "-12-18",
+    "-12-25", "-01-01"
+  )
+
+
+  game_date <- game_dates[week]
+
   baseteamchart <- nflreadr::load_depth_charts(year) |>
     dplyr::mutate(as_of_date = as.Date(dt)) |>
-    dplyr::filter(as_of_date == as.Date(paste0(year, "-09-05"))) |>
+    dplyr::filter(as_of_date == as.Date(paste0(year, game_date))) |>
     dplyr::filter(team==tm & dt == dt[1]) |>
     dplyr::filter(!pos_abb %in% c("PK", "P", "H", "PR", "KR", "LS")) |>
     dplyr::select(team, player_name, espn_id, pos_abb, pos_rank)
@@ -292,7 +316,10 @@ PFF_data_creator <- function(year, pos) {
 #check2 <- PFF_data_creator(2025, "CB")
 
 
-#' Creates a nice looking data frame of PFF data
+#' Create a Team PFF Data Frame
+#'
+#' Creates a team-level data frame of PFF grades and usage metrics for players
+#' on a selected NFL team.
 #'
 #' @param tm Character string. A two- or three-letter NFL team abbreviation.
 #'   Must be one of the following:
@@ -303,15 +330,60 @@ PFF_data_creator <- function(year, pos) {
 #'   \code{"MIN"}, \code{"NE"}, \code{"NO"}, \code{"NYG"}, \code{"NYJ"},
 #'   \code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
 #'   \code{"TEN"}, \code{"WAS"}.
-#' @param year A year between 2024 and 2025
 #'
-#' @return A \code{data.frame} representing a nice looking data frame of
-#' PFF data including mean and sd PFF grades for each position
+#' @param year Numeric. Season year. Must be an integer between
+#'   \code{2022} and \code{2025}.
 #'
+#' @param week Numeric. Week of the regular season used to identify the team's
+#'   depth chart. Must be an integer between \code{1} and \code{18}.
+#'
+#' @return A data.frame containing season-level PFF player grades and usage
+#' metrics for the selected team. Each row corresponds to one player.
+#' \describe{
+#'   \item{final_position}{Simplified position group used by
+#'   \code{NFLSimulator} (e.g., QB, HB, WR, TE, OL, F7, DB).}
+#'   \item{pff_id}{Unique PFF player identifier.}
+#'   \item{player}{Player name.}
+#'   \item{year}{NFL season.}
+#'   \item{position}{Player's original position designation.}
+#'   \item{games}{Number of games played.}
+#'   \item{total_snaps}{Total offensive or defensive snaps played.}
+#'   \item{mean_pass_attempts}{Average pass attempts per game (quarterbacks).}
+#'   \item{mean_pass}{Mean PFF passing grade.}
+#'   \item{sd_pass}{Standard deviation of PFF passing grades.}
+#'   \item{mean_rush}{Mean PFF rushing grade.}
+#'   \item{sd_rush}{Standard deviation of PFF rushing grades.}
+#'   \item{birth_date}{Player's date of birth.}
+#'   \item{birthyear}{Player's birth year.}
+#'   \item{age}{Player age during the selected season.}
+#'   \item{mean_rush_attempts}{Average rushing attempts per game.}
+#'   \item{mean_rec}{Mean PFF receiving grade.}
+#'   \item{sd_rec}{Standard deviation of PFF receiving grades.}
+#'   \item{mean_pass_block}{Mean PFF pass-blocking grade.}
+#'   \item{sd_pass_block}{Standard deviation of PFF pass-blocking grades.}
+#'   \item{mean_run_block}{Mean PFF run-blocking grade.}
+#'   \item{sd_run_block}{Standard deviation of PFF run-blocking grades.}
+#'   \item{mean_routes}{Average routes run per game.}
+#'   \item{mean_off_snaps}{Average offensive snaps per game.}
+#'   \item{mean_def_snaps}{Average defensive snaps per game.}
+#'   \item{mean_pass_rush_defense}{Mean PFF pass-rushing grade.}
+#'   \item{sd_pass_rush_defense}{Standard deviation of PFF pass-rushing grades.}
+#'   \item{mean_coverage_defense}{Mean PFF coverage grade.}
+#'   \item{sd_coverage_defense}{Standard deviation of PFF coverage grades.}
+#'   \item{mean_run_defense}{Mean PFF run-defense grade.}
+#'   \item{sd_run_defense}{Standard deviation of PFF run-defense grades.}
+#' }
+#'
+#'#' @details
+#' This function combines team depth chart information with position-specific
+#' PFF grade and usage data. Positions are grouped into simplified categories
+#' used by \code{NFLSimulator}, such as \code{OL}, \code{F7}, and \code{DB}.
+#' Some columns may contain missing values for positions where the statistic is
+#' not applicable.
 #'
 #' @export
-full_PFF <- function(tm, year){
-  dpt_cht <- depthchart(tm, year) |>
+full_PFF <- function(tm, year = 2025, week = 1){
+  dpt_cht <- depthchart(tm, year, week) |>
     dplyr::select(-c(position, player))
   quarterback <- PFF_data_creator(year, "QB")
   runningbacks <- PFF_data_creator(year, "HB")
@@ -325,6 +397,8 @@ full_PFF <- function(tm, year){
                        oline, defensivebacks, frontseven)
   finaldf <- suppressMessages(reduce(allpositions, dplyr::full_join))
   finaldf$pff_id <- as.character(finaldf$pff_id)
+  colnames(finaldf)[colnames(finaldf) == "Year"] <- "year"
+  colnames(finaldf)[colnames(finaldf) == "Age"] <- "age"
   dplyr::left_join(dpt_cht, finaldf) |>
     suppressMessages() |>
     dplyr::filter(!is.na(player))

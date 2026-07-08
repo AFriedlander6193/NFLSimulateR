@@ -2,9 +2,9 @@
 % Please edit documentation in R/SimulatorFunctions.R
 \name{full_PFF}
 \alias{full_PFF}
-\title{Creates a nice looking data frame of PFF data}
+\title{Creating a PFF data frame}
 \usage{
-full_PFF(tm, year)
+full_PFF(tm, year = 2025, week = 1)
 }
 \arguments{
 \item{tm}{Character string. A two- or three-letter NFL team abbreviation.
@@ -17,12 +17,51 @@ Must be one of the following:
 \code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
 \code{"TEN"}, \code{"WAS"}.}
 
-\item{year}{A year between 2024 and 2025}
+\item{year}{Numeric. Season year. Must be an integer between
+\code{2022} and \code{2025}.}
+
+\item{week}{Numeric. Week of the regular season. Must be an integer
+between \code{1} and \code{18}.}
 }
 \value{
-A \code{data.frame} representing a nice looking data frame of
-PFF data including mean and sd PFF grades for each position
+A data.frame containing season-level PFF player grades and usage
+metrics for the selected team. Each row corresponds to one player.
+\describe{
+\item{final_position}{Simplified position group used by
+\code{NFLSimulator} (e.g., QB, HB, WR, TE, OL, F7, DB).}
+\item{pff_id}{Unique PFF player identifier.}
+\item{player}{Player name.}
+\item{year}{NFL season.}
+\item{position}{Player's original position designation.}
+\item{games}{Number of games played.}
+\item{total_snaps}{Total offensive or defensive snaps played.}
+\item{mean_pass_attempts}{Average pass attempts per game (quarterbacks).}
+\item{mean_pass}{Mean PFF passing grade.}
+\item{sd_pass}{Standard deviation of PFF passing grades.}
+\item{mean_rush}{Mean PFF rushing grade.}
+\item{sd_rush}{Standard deviation of PFF rushing grades.}
+\item{birth_date}{Player's date of birth.}
+\item{birthyear}{Player's birth year.}
+\item{age}{Player age during the selected season.}
+\item{mean_rush_attempts}{Average rushing attempts per game.}
+\item{mean_rec}{Mean PFF receiving grade.}
+\item{sd_rec}{Standard deviation of PFF receiving grades.}
+\item{mean_pass_block}{Mean PFF pass-blocking grade.}
+\item{sd_pass_block}{Standard deviation of PFF pass-blocking grades.}
+\item{mean_run_block}{Mean PFF run-blocking grade.}
+\item{sd_run_block}{Standard deviation of PFF run-blocking grades.}
+\item{mean_routes}{Average routes run per game.}
+\item{mean_off_snaps}{Average offensive snaps per game.}
+\item{mean_def_snaps}{Average defensive snaps per game.}
+\item{mean_pass_rush_defense}{Mean PFF pass-rushing grade.}
+\item{sd_pass_rush_defense}{Standard deviation of PFF pass-rushing grades.}
+\item{mean_coverage_defense}{Mean PFF coverage grade.}
+\item{sd_coverage_defense}{Standard deviation of PFF coverage grades.}
+\item{mean_run_defense}{Mean PFF run-defense grade.}
+\item{sd_run_defense}{Standard deviation of PFF run-defense grades.}
+}
 }
 \description{
-Creates a nice looking data frame of PFF data
+Creates a nice looking data frame of PFF data for every position on an entire
+NFL team
 }

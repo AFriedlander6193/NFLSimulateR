@@ -2,9 +2,9 @@
 % Please edit documentation in R/SimulatorFunctions.R
 \name{depthchart}
 \alias{depthchart}
-\title{Get the Most Updated NFL Depth Chart for a Team}
+\title{Get an NFL Team Depth Chart}
 \usage{
-depthchart(tm, year)
+depthchart(tm, year = 2025, week = 1)
 }
 \arguments{
 \item{tm}{Character string. A two- or three-letter NFL team abbreviation.
@@ -17,16 +17,28 @@ Must be one of the following:
 \code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
 \code{"TEN"}, \code{"WAS"}.}
 
-\item{year}{A year between 2024 and 2025}
+\item{year}{Numeric. Season year. Must be an integer between
+\code{2022} and \code{2025}.}
+
+\item{week}{Numeric. Week of the regular season. Must be an integer
+between \code{1} and \code{18}.}
 }
 \value{
-A \code{data.frame} representing the depth chart, including player names
-and their positions.
+A data.frame with one row per player on the team's depth chart.
+\describe{
+\item{position}{Position from the official NFL depth chart.}
+\item{player}{Player name.}
+\item{depth_team}{Depth chart rank at the position (1 = starter).}
+\item{final_position}{Simplified position category used by the simulator.}
+\item{pff_id}{Unique PFF player identifier.}
+}
 }
 \description{
-Returns the most updated depth chart for a selected NFL team
+Retrieves the most recent depth chart for an NFL team or the depth chart
+from a provided year and week
 }
 \details{
-This function returns a depth chart (3 deep) for each position on
-offense and defense (not special teams).
+Returns the offensive and defensive depth chart (up to three players per
+position) for the specified team and week. Special teams positions are
+excluded.
 }
