@@ -96,11 +96,11 @@ simulate_game(
 Run many simulations of the same matchup:
 
 ```r
-simulate_multiple_games(
+simulations <- simulate_multiple_games(
   team1 = "KC",
   team2 = "PHI",
   year = 2025,
-  n = 1000
+  n = 10
 )
 ```
 
