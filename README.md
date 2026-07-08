@@ -7,14 +7,14 @@ Make sure you have Rtools45 installed
 
 ```r
 install.packages("pak")
-pak::pak("AFriedlander6193/NFLSimulateR")
+pak::pak("AFriedlander6193/NFLSimulator")
 ```
 
 ### Alternative (remotes)
 
 ```r
 install.packages("remotes")
-remotes::install_github("AFriedlander6193/NFLSimulateR")
+remotes::install_github("AFriedlander6193/NFLSimulator")
 ```
 ## Features
 
