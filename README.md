@@ -153,7 +153,6 @@ citation("NFLSimulateR")
 * Special teams simulation
 * Improved clock management
 * Additional Coaching decisions (timeouts, fourth downs, etc.)
-* `gganimate` visualizations for displaying simulated plays and football concepts
 * Expanded support for past NFL seasons
 * Weekly PFF updating for future seasons
 
