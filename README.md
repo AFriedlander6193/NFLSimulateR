@@ -1,5 +1,8 @@
 ## Installation
 
+### NOTE:
+Make sure you have Rtools45 installed
+
 ### Recommended (pak)
 
 ```r
