@@ -4,7 +4,14 @@
 \alias{multiple_simulations}
 \title{Simulate Multiple NFL Games}
 \usage{
-multiple_simulations(team1, team2, year = 2025, n = 100, max_attempts = 3)
+multiple_simulations(
+  team1,
+  team2,
+  year = 2025,
+  week = 1,
+  n = 100,
+  max_attempts = 3
+)
 }
 \arguments{
 \item{team1}{Character string. A two- or three-letter NFL team abbreviation.
@@ -30,6 +37,11 @@ Must be different from \code{team1}.}
 
 \item{year}{Numeric. Season year. Must be an integer between
 \code{2022} and \code{2025}.}
+
+\item{week}{Numeric. NFL regular season week to use for the simulation.
+Must be an integer between \code{1} and \code{18}. The specified week
+determines the active rosters, depth charts, and player PFF grades used
+during the simulation.}
 
 \item{n}{Integer. Number of game simulations to perform. The default is
 \code{100}.}

@@ -5,5 +5,16 @@ utils::globalVariables(c(
   "fumbleposition", "games", "mean_off_snaps",
   "passrushers", "pff_id", "player", "player_id",
   "player_name", "pos_abb", "pos_rank", "position",
-  "simple_personnel", "team", "total_snaps"
+  "simple_personnel", "team", "total_snaps",
+  "mean_pass", "sd_pass", "mean_pass1",
+  "mean_rush", "mean_rec",
+  "mean_pass_block", "mean_run_block",
+  "mean_rush1", "mean_rec1",
+  "mean_pass_block1", "mean_run_block1",
+  "mean_pass_rush_defense", "mean_coverage_defense",
+  "mean_run_defense", "mean_pass_rush_defense1",
+  "mean_coverage_defense1", "mean_run_defense1",
+  "sd_rush", "sd_rec", "sd_pass_block",
+  "sd_run_block", "sd_pass_rush_defense",
+  "sd_coverage_defense", "sd_run_defense"
 ))

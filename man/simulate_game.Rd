@@ -4,7 +4,14 @@
 \alias{simulate_game}
 \title{Simulate an NFL Game}
 \usage{
-simulate_game(team1, team2, year = 2025, track = "NO")
+simulate_game(
+  team1,
+  team2,
+  year = 2025,
+  week = 1,
+  track = FALSE,
+  create_data = FALSE
+)
 }
 \arguments{
 \item{team1}{Character string. A two- or three-letter NFL team abbreviation.
@@ -31,16 +38,29 @@ Must be different from \code{team1}.}
 \item{year}{Numeric. Season year. Must be an integer between
 \code{2022} and \code{2025}.}
 
-\item{track}{Character string indicating whether to print the simulated
-play-by-play to the console. Accepted values are
-\code{"yes"}, \code{"Yes"}, \code{"YES"},
-\code{"no"}, \code{"No"}, and \code{"NO"}.
-The default is \code{"no"}.}
+\item{week}{Numeric. NFL regular season week to use for the simulation.
+Must be an integer between \code{1} and \code{18}. The specified week
+determines the active rosters, depth charts, and player PFF grades used
+during the simulation.}
+
+\item{track}{Logical. If \code{TRUE}, the simulated play-by-play is printed
+to the console as the game progresses. If \code{FALSE} (default), no
+play-by-play output is displayed.}
+
+\item{create_data}{Logical. If \code{TRUE}, a play-by-play data frame
+containing information for every simulated play is returned along with the
+final score. If \code{FALSE} (default), only the final score is returned.}
 }
 \value{
-A one-row data.frame containing the simulated final score. The
-column names correspond to the two teams provided, and the values are the
-simulated final scores.
+If \code{create_data = FALSE}, returns a one-row data frame
+containing the simulated final score. The column names correspond to the
+two teams provided, and the values are the simulated final scores.
+
+If \code{create_data = TRUE}, returns a list containing:
+\describe{
+\item{\code{score}}{A one-row data frame containing the simulated final score.}
+\item{\code{play_by_play}}{A data frame containing one row for each simulated play and the associated play information.}
+}
 }
 \description{
 Simulates a complete NFL game between two teams using statistical models
@@ -54,5 +74,6 @@ Offensive personnel, defensive personnel, formations, coverages, play type,
 player assignments, and play outcomes are sampled from probability
 distributions estimated from historical NFL data. Player-specific PFF grades
 are incorporated throughout the simulation to produce realistic team and
-player behavior.
+player behavior. When requested, a complete play-by-play data set is
+generated that can be used for downstream analysis or visualization.
 }

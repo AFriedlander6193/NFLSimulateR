@@ -383,15 +383,301 @@ PFF_data_creator <- function(year, pos) {
 #'
 #' @export
 full_PFF <- function(tm, year = 2025, week = 1){
+
   dpt_cht <- depthchart(tm, year, week) |>
     dplyr::select(-c(position, player))
-  quarterback <- PFF_data_creator(year, "QB")
-  runningbacks <- PFF_data_creator(year, "HB")
-  widereceivers <- PFF_data_creator(year, "WR")
-  tightends <- PFF_data_creator(year, "TE")
-  oline <- PFF_data_creator(year, "OL")
-  frontseven <- PFF_data_creator(year, "F7")
-  defensivebacks <- PFF_data_creator(year, "DB")
+
+  if (week <= 2) {
+    quarterback <- PFF_data_creator(year - 1, "QB")
+    runningbacks <- PFF_data_creator(year - 1, "HB")
+    widereceivers <- PFF_data_creator(year - 1, "WR")
+    tightends <- PFF_data_creator(year - 1, "TE")
+    oline <- PFF_data_creator(year - 1, "OL")
+    frontseven <- PFF_data_creator(year - 1, "F7")
+    defensivebacks <- PFF_data_creator(year - 1, "DB")
+  } else if (week > 2 & week < 9) {
+    quarterback <- PFF_data_creator(year, "QB")
+    quarterback_prev <- PFF_data_creator(year - 1, "QB") |>
+      dplyr::select(pff_id, mean_pass, sd_pass)
+    colnames(quarterback_prev) <- c("pff_id", "mean_pass1", "sd_pass1")
+    quarterback <- dplyr::left_join(quarterback, quarterback_prev) |>
+      suppressMessages()
+    quarterback <- quarterback |>
+      dplyr::mutate(
+        mean_pass = dplyr::coalesce(
+          (((week - 2) * mean_pass) + ((9 - week) * mean_pass1)) /
+            ((week - 2) + (9 - week)),
+          mean_pass,
+          mean_pass1
+        )
+      ) |>
+      dplyr::select(-c("mean_pass1", "sd_pass1"))
+
+    runningbacks <- PFF_data_creator(year, "HB")
+    runningbacks_prev <- PFF_data_creator(year - 1, "HB") |>
+      dplyr::select(pff_id, mean_rush, mean_rec, mean_pass_block, mean_run_block)
+    colnames(runningbacks_prev) <- c("pff_id", "mean_rush1", "mean_rec1",
+                                     "mean_pass_block1", "mean_run_block1")
+
+    runningbacks <- dplyr::left_join(runningbacks, runningbacks_prev) |>
+      suppressMessages()
+    runningbacks <- runningbacks |>
+      dplyr::mutate(
+        mean_rush = dplyr::coalesce(
+          (((week - 2) * mean_rush) + ((9 - week) * mean_rush1)) /
+            ((week - 2) + (9 - week)),
+          mean_rush,
+          mean_rush1
+        ),
+        mean_rec = dplyr::coalesce(
+          (((week - 2) * mean_rec) + ((9 - week) * mean_rec1)) /
+            ((week - 2) + (9 - week)),
+          mean_rec,
+          mean_rec1
+        ),
+        mean_pass_block = dplyr::coalesce(
+          (((week - 2) * mean_pass_block) + ((9 - week) * mean_pass_block1)) /
+            ((week - 2) + (9 - week)),
+          mean_pass_block,
+          mean_pass_block1
+        ),
+        mean_run_block = dplyr::coalesce(
+          (((week - 2) * mean_run_block) + ((9 - week) * mean_run_block1)) /
+            ((week - 2) + (9 - week)),
+          mean_run_block,
+          mean_run_block1
+        )
+      ) |>
+      dplyr::select(-c("mean_rush1", "mean_rec1",
+                       "mean_pass_block1", "mean_run_block1"))
+
+    widereceivers <- PFF_data_creator(year, "WR")
+    widereceivers_prev <- PFF_data_creator(year - 1, "WR") |>
+      dplyr::select(pff_id, mean_rec, mean_pass_block, mean_run_block)
+    colnames(widereceivers_prev) <- c("pff_id", "mean_rec1",
+                                     "mean_pass_block1", "mean_run_block1")
+
+    widereceivers <- dplyr::left_join(widereceivers, widereceivers_prev) |>
+      suppressMessages()
+    widereceivers <- widereceivers |>
+      dplyr::mutate(
+        mean_rec = dplyr::coalesce(
+          (((week - 2) * mean_rec) + ((9 - week) * mean_rec1)) /
+            ((week - 2) + (9 - week)),
+          mean_rec,
+          mean_rec1
+        ),
+        mean_pass_block = dplyr::coalesce(
+          (((week - 2) * mean_pass_block) + ((9 - week) * mean_pass_block1)) /
+            ((week - 2) + (9 - week)),
+          mean_pass_block,
+          mean_pass_block1
+        ),
+        mean_run_block = dplyr::coalesce(
+          (((week - 2) * mean_run_block) + ((9 - week) * mean_run_block1)) /
+            ((week - 2) + (9 - week)),
+          mean_run_block,
+          mean_run_block1
+        )
+      ) |>
+      dplyr::select(-c("mean_rec1",
+                       "mean_pass_block1", "mean_run_block1"))
+
+    tightends <- PFF_data_creator(year, "TE")
+    tightends_prev <- PFF_data_creator(year - 1, "TE") |>
+      dplyr::select(pff_id, mean_rec, mean_pass_block, mean_run_block)
+    colnames(tightends_prev) <- c("pff_id", "mean_rec1",
+                                     "mean_pass_block1", "mean_run_block1")
+
+    tightends <- dplyr::left_join(tightends, tightends_prev) |>
+      suppressMessages()
+    tightends <- tightends |>
+      dplyr::mutate(
+        mean_rec = dplyr::coalesce(
+          (((week - 2) * mean_rec) + ((9 - week) * mean_rec1)) /
+            ((week - 2) + (9 - week)),
+          mean_rec,
+          mean_rec1
+        ),
+        mean_pass_block = dplyr::coalesce(
+          (((week - 2) * mean_pass_block) + ((9 - week) * mean_pass_block1)) /
+            ((week - 2) + (9 - week)),
+          mean_pass_block,
+          mean_pass_block1
+        ),
+        mean_run_block = dplyr::coalesce(
+          (((week - 2) * mean_run_block) + ((9 - week) * mean_run_block1)) /
+            ((week - 2) + (9 - week)),
+          mean_run_block,
+          mean_run_block1
+        )
+      ) |>
+      dplyr::select(-c("mean_rec1",
+                       "mean_pass_block1", "mean_run_block1"))
+
+
+    oline <- PFF_data_creator(year, "OL")
+    oline_prev <- PFF_data_creator(year - 1, "OL") |>
+      dplyr::select(pff_id, mean_pass_block, mean_run_block)
+    colnames(oline_prev) <- c("pff_id",
+                                  "mean_pass_block1", "mean_run_block1")
+
+    oline <- dplyr::left_join(oline, oline_prev) |>
+      suppressMessages()
+    oline <- oline |>
+      dplyr::mutate(
+        mean_pass_block = dplyr::coalesce(
+          (((week - 2) * mean_pass_block) + ((9 - week) * mean_pass_block1)) /
+            ((week - 2) + (9 - week)),
+          mean_pass_block,
+          mean_pass_block1
+        ),
+        mean_run_block = dplyr::coalesce(
+          (((week - 2) * mean_run_block) + ((9 - week) * mean_run_block1)) /
+            ((week - 2) + (9 - week)),
+          mean_run_block,
+          mean_run_block1
+        )
+      ) |>
+      dplyr::select(-c("mean_pass_block1", "mean_run_block1"))
+
+
+    frontseven <- PFF_data_creator(year, "F7")
+    frontseven_prev <- PFF_data_creator(year - 1, "F7") |>
+      dplyr::select(pff_id, mean_pass_rush_defense, mean_coverage_defense,
+                    mean_run_defense)
+    colnames(frontseven_prev) <- c("pff_id",
+                              "mean_pass_rush_defense1", "mean_coverage_defense1",
+                              "mean_run_defense1")
+
+    frontseven <- dplyr::left_join(frontseven, frontseven_prev) |>
+      suppressMessages()
+    frontseven <- frontseven |>
+      dplyr::mutate(
+        mean_pass_rush_defense = dplyr::coalesce(
+          (((week - 2) * mean_pass_rush_defense) + ((9 - week) * mean_pass_rush_defense1)) /
+            ((week - 2) + (9 - week)),
+          mean_pass_rush_defense,
+          mean_pass_rush_defense1
+        ),
+        mean_coverage_defense = dplyr::coalesce(
+          (((week - 2) * mean_coverage_defense) + ((9 - week) * mean_coverage_defense1)) /
+            ((week - 2) + (9 - week)),
+          mean_coverage_defense,
+          mean_coverage_defense1
+        ),
+        mean_run_defense = dplyr::coalesce(
+          (((week - 2) * mean_run_defense) + ((9 - week) * mean_run_defense1)) /
+            ((week - 2) + (9 - week)),
+          mean_run_defense,
+          mean_run_defense1
+        )
+      ) |>
+      dplyr::select(-c("mean_pass_rush_defense1", "mean_coverage_defense1",
+                       "mean_run_defense1"))
+
+    defensivebacks <- PFF_data_creator(year, "DB")
+    defensivebacks_prev <- PFF_data_creator(year - 1, "DB") |>
+      dplyr::select(pff_id, mean_pass_rush_defense, mean_coverage_defense,
+                    mean_run_defense)
+    colnames(defensivebacks_prev) <- c("pff_id",
+                                   "mean_pass_rush_defense1", "mean_coverage_defense1",
+                                   "mean_run_defense1")
+
+    defensivebacks <- dplyr::left_join(defensivebacks, defensivebacks_prev) |>
+      suppressMessages()
+    defensivebacks <- defensivebacks |>
+      dplyr::mutate(
+        mean_pass_rush_defense = dplyr::coalesce(
+          (((week - 2) * mean_pass_rush_defense) + ((9 - week) * mean_pass_rush_defense1)) /
+            ((week - 2) + (9 - week)),
+          mean_pass_rush_defense,
+          mean_pass_rush_defense1
+        ),
+        mean_coverage_defense = dplyr::coalesce(
+          (((week - 2) * mean_coverage_defense) + ((9 - week) * mean_coverage_defense1)) /
+            ((week - 2) + (9 - week)),
+          mean_coverage_defense,
+          mean_coverage_defense1
+        ),
+        mean_run_defense = dplyr::coalesce(
+          (((week - 2) * mean_run_defense) + ((9 - week) * mean_run_defense1)) /
+            ((week - 2) + (9 - week)),
+          mean_run_defense,
+          mean_run_defense1
+        )
+      )  |>
+      dplyr::select(-c("mean_pass_rush_defense1", "mean_coverage_defense1",
+                       "mean_run_defense1"))
+
+  } else {
+    quarterback <- PFF_data_creator(year, "QB")
+    runningbacks <- PFF_data_creator(year, "HB")
+    widereceivers <- PFF_data_creator(year, "WR")
+    tightends <- PFF_data_creator(year, "TE")
+    oline <- PFF_data_creator(year, "OL")
+    frontseven <- PFF_data_creator(year, "F7")
+    defensivebacks <- PFF_data_creator(year, "DB")
+  }
+
+  quarterback <- quarterback |>
+    dplyr::mutate(mean_pass = ifelse(is.na(mean_pass), 42.5, mean_pass),
+           sd_pass = ifelse(is.na(sd_pass), 12.5, sd_pass)
+           )
+
+  runningbacks <- runningbacks |>
+    dplyr::mutate(mean_rush = ifelse(is.na(mean_rush), 42.5, mean_rush),
+                  sd_rush = ifelse(is.na(sd_rush), 12.5, sd_rush),
+                  mean_rec = ifelse(is.na(mean_rec), 42.5, mean_rec),
+                  sd_rec = ifelse(is.na(sd_rush), 12.5, sd_rec),
+                  mean_pass_block = ifelse(is.na(mean_pass_block), 42.5, mean_pass_block),
+                  sd_pass_block = ifelse(is.na(sd_pass_block), 12.5, sd_pass_block),
+                  mean_run_block = ifelse(is.na(mean_run_block), 42.5, mean_run_block),
+                  sd_run_block = ifelse(is.na(sd_run_block), 12.5, sd_run_block)
+    )
+
+  widereceivers <- widereceivers |>
+    dplyr::mutate(mean_rec = ifelse(is.na(mean_rec), 42.5, mean_rec),
+                  sd_rec = ifelse(is.na(sd_rec), 12.5, sd_rec),
+                  mean_pass_block = ifelse(is.na(mean_pass_block), 42.5, mean_pass_block),
+                  sd_pass_block = ifelse(is.na(sd_pass_block), 12.5, sd_pass_block),
+                  mean_run_block = ifelse(is.na(mean_run_block), 42.5, mean_run_block),
+                  sd_run_block = ifelse(is.na(sd_run_block), 12.5, sd_run_block)
+    )
+
+  tightends <- tightends |>
+    dplyr::mutate(mean_rec = ifelse(is.na(mean_rec), 42.5, mean_rec),
+                  sd_rec = ifelse(is.na(sd_rec), 12.5, sd_rec),
+                  mean_pass_block = ifelse(is.na(mean_pass_block), 42.5, mean_pass_block),
+                  sd_pass_block = ifelse(is.na(sd_pass_block), 12.5, sd_pass_block),
+                  mean_run_block = ifelse(is.na(mean_run_block), 42.5, mean_run_block),
+                  sd_run_block = ifelse(is.na(sd_run_block), 12.5, sd_run_block)
+    )
+
+  oline <- oline |>
+    dplyr::mutate(mean_pass_block = ifelse(is.na(mean_pass_block), 42.5, mean_pass_block),
+                  sd_pass_block = ifelse(is.na(sd_pass_block), 12.5, sd_pass_block),
+                  mean_run_block = ifelse(is.na(mean_run_block), 42.5, mean_run_block),
+                  sd_run_block = ifelse(is.na(sd_run_block), 12.5, sd_run_block)
+    )
+
+  frontseven <- frontseven |>
+    dplyr::mutate(mean_pass_rush_defense = ifelse(is.na(mean_pass_rush_defense), 42.5, mean_pass_rush_defense),
+                  sd_pass_rush_defense = ifelse(is.na(sd_pass_rush_defense), 12.5, sd_pass_rush_defense),
+                  mean_coverage_defense = ifelse(is.na(mean_coverage_defense), 42.5, mean_coverage_defense),
+                  sd_coverage_defense = ifelse(is.na(sd_coverage_defense), 12.5, sd_coverage_defense),
+                  mean_run_defense = ifelse(is.na(mean_run_defense), 42.5, mean_run_defense),
+                  sd_run_defense = ifelse(is.na(sd_run_defense), 12.5, sd_run_defense)
+    )
+
+  defensivebacks <- defensivebacks |>
+    dplyr::mutate(mean_pass_rush_defense = ifelse(is.na(mean_pass_rush_defense), 42.5, mean_pass_rush_defense),
+                  sd_pass_rush_defense = ifelse(is.na(sd_pass_rush_defense), 12.5, sd_pass_rush_defense),
+                  mean_coverage_defense = ifelse(is.na(mean_coverage_defense), 42.5, mean_coverage_defense),
+                  sd_coverage_defense = ifelse(is.na(sd_coverage_defense), 12.5, sd_coverage_defense),
+                  mean_run_defense = ifelse(is.na(mean_run_defense), 42.5, mean_run_defense),
+                  sd_run_defense = ifelse(is.na(sd_run_defense), 12.5, sd_run_defense)
+    )
 
   allpositions <- list(quarterback, runningbacks, widereceivers, tightends,
                        oline, defensivebacks, frontseven)
@@ -1804,17 +2090,32 @@ simulate_yards_gained <- function(posstm, deftm, down, togo, YdsBef, posstmdiff,
 #'   \code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
 #'   \code{"TEN"}, \code{"WAS"}.
 #'   Must be different from \code{team1}.
+#'
 #' @param year Numeric. Season year. Must be an integer between
 #'   \code{2022} and \code{2025}.
-#' @param track Character string indicating whether to print the simulated
-#'   play-by-play to the console. Accepted values are
-#'   \code{"yes"}, \code{"Yes"}, \code{"YES"},
-#'   \code{"no"}, \code{"No"}, and \code{"NO"}.
-#'   The default is \code{"no"}.
 #'
-#' @return A one-row data.frame containing the simulated final score. The
-#' column names correspond to the two teams provided, and the values are the
-#' simulated final scores.
+#' @param week Numeric. NFL regular season week to use for the simulation.
+#'   Must be an integer between \code{1} and \code{18}. The specified week
+#'   determines the active rosters, depth charts, and player PFF grades used
+#'   during the simulation.
+#'
+#' @param track Logical. If \code{TRUE}, the simulated play-by-play is printed
+#'   to the console as the game progresses. If \code{FALSE} (default), no
+#'   play-by-play output is displayed.
+#'
+#' @param create_data Logical. If \code{TRUE}, a play-by-play data frame
+#'   containing information for every simulated play is returned along with the
+#'   final score. If \code{FALSE} (default), only the final score is returned.
+#'
+#' @return If \code{create_data = FALSE}, returns a one-row data frame
+#' containing the simulated final score. The column names correspond to the
+#' two teams provided, and the values are the simulated final scores.
+#'
+#' If \code{create_data = TRUE}, returns a list containing:
+#' \describe{
+#'   \item{\code{score}}{A one-row data frame containing the simulated final score.}
+#'   \item{\code{play_by_play}}{A data frame containing one row for each simulated play and the associated play information.}
+#' }
 #'
 #' @details
 #' The simulation proceeds one play at a time until the game is complete.
@@ -1822,12 +2123,16 @@ simulate_yards_gained <- function(posstm, deftm, down, togo, YdsBef, posstmdiff,
 #' player assignments, and play outcomes are sampled from probability
 #' distributions estimated from historical NFL data. Player-specific PFF grades
 #' are incorporated throughout the simulation to produce realistic team and
-#' player behavior.
+#' player behavior. When requested, a complete play-by-play data set is
+#' generated that can be used for downstream analysis or visualization.
 #'
 #' @export
-simulate_game <- function(team1, team2, year = 2025, track = "NO") {
+simulate_game <- function(team1, team2, year = 2025, week = 1, track = FALSE,
+                          create_data = FALSE) {
 
   data_env <- get_data_env()
+
+  play_count <- 1
 
   # track <- track
   play <- list(yards = 0, runpass = "Run", result = "Default")
@@ -1928,11 +2233,18 @@ simulate_game <- function(team1, team2, year = 2025, track = "NO") {
   }
 
   quartercheck <- function(game_state) {
-    if(game_state$quartersecondsleft <= 0) {
-      game_state$quartersecondsleft <- 900
-      game_state$secondsleft <- 3600 - (game_state$quarter * 900)
+    if (game_state$quartersecondsleft <= 0) {
       game_state$quarter <- game_state$quarter + 1
-      if(game_state$quarter == 3) {
+
+      if (game_state$quarter == 5 && game_state$posstmmargin == 0) {
+        game_state$quartersecondsleft <- 600
+        game_state$secondsleft <- 600
+      } else {
+        game_state$quartersecondsleft <- 900
+        game_state$secondsleft <- 3600 - ((game_state$quarter - 1) * 900)
+      }
+
+      if (game_state$quarter == 3) {
         game_state$posstm <- game_state$startdefteam
         game_state$deftm <- game_state$startoffteam
         game_state$down <- 1
@@ -1941,7 +2253,8 @@ simulate_game <- function(team1, team2, year = 2025, track = "NO") {
         game_state <- posstmmargin_updater(game_state)
       }
     }
-    return(game_state)
+
+    game_state
   }
 
   deftd <- function(game_state, playtimemean, playtimesd) {
@@ -2122,13 +2435,46 @@ simulate_game <- function(team1, team2, year = 2025, track = "NO") {
   game_state <- posstmmargin_updater(game_state)
 
   # Main game loop
-  while(game_state$secondsleft > 0) {
+  while(TRUE) {
     game_state$scoredf$Quarter <- game_state$quarter
     game_state$scoredf$SecondsLeft <- game_state$quartersecondsleft
     game_state$scoredf$Possession <- game_state$posstm
     game_state$scoredf$Down <- game_state$down
     game_state$scoredf$ToGo <- game_state$togo
     game_state$scoredf$YdstoEZ <- game_state$ydsbef
+
+    if (game_state$quarter == 5 && game_state$posstmmargin != 0
+        && is.null(game_state$ot_started)) {
+      finalscoredf <- game_state$scoredf[7:8]
+      break
+    }
+
+    ## OT implementation
+    if (game_state$quarter == 5 && game_state$posstmmargin == 0 &&
+        is.null(game_state$ot_started)) {
+      game_state$posstm <- sample(game_state$teams, 1)
+      game_state$deftm <- game_state$teams[game_state$teams != game_state$posstm]
+      game_state$down <- 1
+      game_state$togo <- 10
+      game_state$ydsbef <- 70
+
+      game_state$ot_started <- TRUE
+
+      possessions_tracker <- c(game_state$posstm)
+    }
+
+    if (game_state$quarter == 5) {
+      possessions_tracker <- unique(c(possessions_tracker, game_state$posstm))
+
+      if (length(possessions_tracker) == 2 && game_state$posstmmargin != 0) {
+        finalscoredf <- game_state$scoredf[7:8]
+      }
+    }
+
+    if (game_state$quarter == 6) {
+      finalscoredf <- game_state$scoredf[7:8]
+    }
+    ##
 
     if(game_state$posstm==team1){
       off_dat <- whole_team1
@@ -2401,12 +2747,22 @@ simulate_game <- function(team1, team2, year = 2025, track = "NO") {
     }
     game_state$scoredf$Detail <- paste0(play$runpass, "; ", play$result, "; Yards: ", play$yards)
     game_state$scoredf <- game_state$scoredf |> relocate((Quarter:YdstoEZ), .before = all_of(team1))
-    if(track %in% c("YES", "Y", "Yes", "yes", "y")){
+    if (isTRUE(track)){
       print(game_state$scoredf)
     }
+    if (isTRUE(create_data) && play_count == 1) {
+      output_df <- game_state$scoredf[0, ]
+      play_count <- play_count + 1
+    }
+    if (isTRUE(create_data)) {
+      output_df <- rbind(output_df, game_state$scoredf)
+    }
+
   }
-  finalscoredf <- game_state$scoredf[7:8]
-  return(finalscoredf)
+  if (isTRUE(create_data)) {
+    finalscoredf <- output_df
+  }
+  finalscoredf
 }
 
 # simulator("DEN", "SEA", year = 2025, track = "YES")
@@ -2440,6 +2796,11 @@ simulate_game <- function(team1, team2, year = 2025, track = "NO") {
 #' @param year Numeric. Season year. Must be an integer between
 #'   \code{2022} and \code{2025}.
 #'
+#' @param week Numeric. NFL regular season week to use for the simulation.
+#'   Must be an integer between \code{1} and \code{18}. The specified week
+#'   determines the active rosters, depth charts, and player PFF grades used
+#'   during the simulation.
+#'
 #' @param n Integer. Number of game simulations to perform. The default is
 #'   \code{100}.
 #'
@@ -2468,7 +2829,7 @@ simulate_game <- function(team1, team2, year = 2025, track = "NO") {
 #' \code{max_attempts} consecutive failures have occurred.
 #'
 #' @export
-multiple_simulations <- function(team1, team2, year = 2025,
+multiple_simulations <- function(team1, team2, year = 2025, week = 1,
                                  n = 100, max_attempts = 3) {
   resultlist <- vector("list", n)
   successful_runs <- 0
@@ -2486,7 +2847,7 @@ multiple_simulations <- function(team1, team2, year = 2025,
     # Try with time limit
     try_result <- try({
       setTimeLimit(elapsed = 240, transient = TRUE)  # 4 minutes = 240 seconds
-      res <- simulate_game(team1, team2, year)
+      res <- simulate_game(team1, team2, year, week)
       setTimeLimit(elapsed = Inf, transient = TRUE)  # Reset time limit
     }, silent = TRUE)
 

@@ -60,15 +60,15 @@ metrics for the selected team. Each row corresponds to one player.
 \item{mean_run_defense}{Mean PFF run-defense grade.}
 \item{sd_run_defense}{Standard deviation of PFF run-defense grades.}
 }
-
-#' @details
+}
+\description{
+Creates a team-level data frame of PFF grades and usage metrics for players
+on a selected NFL team.
+}
+\details{
 This function combines team depth chart information with position-specific
 PFF grade and usage data. Positions are grouped into simplified categories
 used by \code{NFLSimulateR}, such as \code{OL}, \code{F7}, and \code{DB}.
 Some columns may contain missing values for positions where the statistic is
 not applicable.
-}
-\description{
-Creates a team-level data frame of PFF grades and usage metrics for players
-on a selected NFL team.
 }
