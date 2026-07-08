@@ -374,7 +374,7 @@ PFF_data_creator <- function(year, pos) {
 #'   \item{sd_run_defense}{Standard deviation of PFF run-defense grades.}
 #' }
 #'
-#'#' @details
+#' @details
 #' This function combines team depth chart information with position-specific
 #' PFF grade and usage data. Positions are grouped into simplified categories
 #' used by \code{NFLSimulateR}, such as \code{OL}, \code{F7}, and \code{DB}.
