@@ -19,6 +19,7 @@ Imports:
     stats,
     tibble,
     stringr,
+    xgboost,
     rlist
 LazyData: true
 URL: https://github.com/AFriedlander6193/NFLSimulator

@@ -13,5 +13,6 @@
 #' @importFrom rlang .data
 #' @import stringr
 #' @import rlist
+#' @importFrom xgboost xgb.DMatrix
 #' @importFrom tibble tibble
 NULL

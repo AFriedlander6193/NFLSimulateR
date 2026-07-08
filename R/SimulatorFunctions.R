@@ -437,7 +437,9 @@ choose_personnel <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
     data = modeldat
   )
 
-  probs <- predict(data_env$off_pers_mod, X, type = "probs")
+  dnew <- xgboost::xgb.DMatrix(data = X)
+
+  probs <- predict(data_env$off_pers_mod, dnew)
   personnels <- sort(unique(data_env$offdf$simple_personnel))
   sample(personnels, size = 1, prob = probs)
 }
@@ -487,7 +489,9 @@ choose_def_personnel <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
     data = modeldat
   )
 
-  probs <- predict(data_env$def_pers_mod, X, type = "probs")
+  dnew <- xgboost::xgb.DMatrix(data = X)
+
+  probs <- predict(data_env$def_pers_mod, dnew)
   def_personnels <- sort(unique(data_env$offdf$simple_def_personnel))
   sample(def_personnels, size = 1, prob = probs)
 }
@@ -544,7 +548,9 @@ choose_formation <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
     data = modeldat
   )
 
-  probs <- predict(data_env$off_form_mod, X, type = "probs")
+  dnew <- xgboost::xgb.DMatrix(data = X)
+
+  probs <- predict(data_env$off_form_mod, dnew)
   off_forms <- sort(unique(data_env$offdf$off_form))
   sample(off_forms, size = 1, prob = probs)
 }
@@ -608,7 +614,9 @@ choose_def_coverage <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
     data = modeldat
   )
 
-  probs <- predict(data_env$def_cov_mod, X, type = "probs")
+  dnew <- xgboost::xgb.DMatrix(data = X)
+
+  probs <- predict(data_env$def_cov_mod, dnew)
   def_covs <- sort(unique(data_env$offdf$def_simple_coverage))
   sample(def_covs, size = 1, prob = probs)
 }
@@ -679,7 +687,9 @@ runorpass <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
     data = modeldat
   )
 
-  passprob <- predict(data_env$run_pass_mod, X, type = "probs")
+  dnew <- xgboost::xgb.DMatrix(data = X)
+
+  passprob <- predict(data_env$run_pass_mod, dnew)
   probs = c(passprob, 1 - passprob)
   labels <- c("Pass", "Run")
   sample(labels, size = 1, prob = probs)
@@ -770,8 +780,10 @@ routeselection <- function(posstm, deftm, down, togo, YdsBef, posstmdiff,
       data = modeldat
     )
 
+    dnew <- xgboost::xgb.DMatrix(data = X)
+
     ### FIGURES OUT NUMBER OF COVER PLAYERS AND PASS RUSHERS
-    probs <- predict(data_env$cov_players_mod, X, type = "probs")
+    probs <- predict(data_env$cov_players_mod, dnew)
     def_cov_players <- 4:8
     coverplayers <- sample(def_cov_players, size = 1, prob = probs)
     passrushers <- 11 - coverplayers
@@ -786,8 +798,10 @@ routeselection <- function(posstm, deftm, down, togo, YdsBef, posstmdiff,
       data = modeldat
     )
 
+    dnew <- xgboost::xgb.DMatrix(data = X)
+
     ### FIGURES OUT THE NUMBER OF ROUTES RAN
-    probs <- predict(data_env$routes_count_mod, X, type = "probs")
+    probs <- predict(data_env$routes_count_mod, dnew)
     routes_ran_nums <- 2:5
     routescount <- sample(routes_ran_nums, size = 1, prob = probs)
     passrushers <- 11 - coverplayers
@@ -798,7 +812,10 @@ routeselection <- function(posstm, deftm, down, togo, YdsBef, posstmdiff,
     ### GETS ROUTE COMBINATION
 
     X <- cbind(X, routescount)
-    route_combo_probs <- predict(data_env$route_combo_mod, X, type = "probs")
+
+    dnew <- xgboost::xgb.DMatrix(data = X)
+
+    route_combo_probs <- predict(data_env$route_combo_mod, dnew)
     route_combo <- sample(1:20, size = 1, prob = route_combo_probs)
 
     modeldat$route_combos <- route_combo
@@ -939,7 +956,9 @@ routeselection <- function(posstm, deftm, down, togo, YdsBef, posstmdiff,
       data = modeldat
     )
 
-    tgtrouteprobs <- predict(data_env$targetted_route_mod, X, type = "probs")
+    dnew <- xgboost::xgb.DMatrix(data = X)
+
+    tgtrouteprobs <- predict(data_env$targetted_route_mod, dnew)
     route_list <- c("ANGLE", "CORNER", "CROSS", "FLAT", "GO", "HITCH", "IN",
                     "OUT", "POST", "SCREEN", "SLANT", "WHEEL")
 
@@ -964,7 +983,9 @@ routeselection <- function(posstm, deftm, down, togo, YdsBef, posstmdiff,
       data = modeldat
     )
 
-    tgt_pos_probs <- predict(data_env$targetted_pos_mod, X, type = "probs")
+    dnew <- xgboost::xgb.DMatrix(data = X)
+
+    tgt_pos_probs <- predict(data_env$targetted_pos_mod, dnew)
     pos_list <- colnames(personneldf)
 
     targetted_pos <- sample(pos_list, 1, prob = tgt_pos_probs)
@@ -1250,8 +1271,10 @@ yardsgained <- function(posstm, deftm, down, togo, YdsBef, posstmdiff, quarter_s
       data = dummydf
     )
 
+    dnew <- xgboost::xgb.DMatrix(data = X)
 
-    pressure_player_probs <- predict(data_env$pressure_players_mod, X, type = "probs")
+
+    pressure_player_probs <- predict(data_env$pressure_players_mod, dnew)
 
     pressureplayers <- sample(c(0:2), 1, prob = pressure_player_probs)
 
@@ -1274,7 +1297,9 @@ yardsgained <- function(posstm, deftm, down, togo, YdsBef, posstmdiff, quarter_s
       data = dummydf
     )
 
-    sackprob <- predict(data_env$sack_mod, X, type = "response")
+    dnew <- xgboost::xgb.DMatrix(data = X)
+
+    sackprob <- predict(data_env$sack_mod, dnew)
     sack <- sample(c("Yes", "No"), 1, prob = c(sackprob, 1-sackprob))
 
     if(sack=="Yes"){
@@ -1310,8 +1335,10 @@ yardsgained <- function(posstm, deftm, down, togo, YdsBef, posstmdiff, quarter_s
         data = dummydf
       )
 
+      dnew <- xgboost::xgb.DMatrix(data = X)
+
       pass_result_options <- c("Complete", "Fumble", "Incomplete", "Interception")
-      pass_result_probs <- predict(data_env$pass_result_mod, X, type = "probs")
+      pass_result_probs <- predict(data_env$pass_result_mod, dnew)
 
       passresult <- sample(pass_result_options, 1, prob = pass_result_probs)
 
@@ -1418,7 +1445,9 @@ yardsgained <- function(posstm, deftm, down, togo, YdsBef, posstmdiff, quarter_s
       data = dummydf
     )
 
-    fumbleprob <- predict(data_env$rush_fumb_mod, X, type = "probs")
+    dnew <- xgboost::xgb.DMatrix(data = X)
+
+    fumbleprob <- predict(data_env$rush_fumb_mod, dnew)
     fumble <- sample(c("Yes", "No"), 1, prob = c(fumbleprob, 1-fumbleprob))
     if(fumble=="No"){
       result <- "No_Fumble"
