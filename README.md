@@ -88,7 +88,8 @@ library(NFLSimulator)
 simulate_game(
   team1 = "KC",
   team2 = "PHI",
-  year = 2025
+  year = 2025,
+  track = "yes"
 )
 ```
 
