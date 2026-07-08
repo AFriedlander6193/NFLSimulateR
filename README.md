@@ -1,6 +1,6 @@
-# NFLSimulator
+# NFLSimulateR
 
-`NFLSimulator` is an R package for simulating NFL games one play at a time using statistical and machine learning models trained on historical NFL play-by-play and PFF player data.
+`NFLSimulateR` is an R package for simulating NFL games one play at a time using statistical and machine learning models trained on historical NFL play-by-play and PFF player data.
 
 Rather than modeling an entire play with a single black-box model, **NFLSimulator** simulates each decision sequentially, conditioning every step on the game state and the decisions that preceded it. This produces realistic game simulations that account for personnel, formations, coverages, player ability, and game situation.
 
@@ -16,14 +16,14 @@ If installing from source on Windows, ensure that the appropriate version of **R
 
 ```r
 install.packages("pak")
-pak::pak("AFriedlander6193/NFLSimulator")
+pak::pak("AFriedlander6193/NFLSimulateR")
 ```
 
 ### Alternative (`remotes`)
 
 ```r
 install.packages("remotes")
-remotes::install_github("AFriedlander6193/NFLSimulator")
+remotes::install_github("AFriedlander6193/NFLSimulateR")
 ```
 
 ---
@@ -108,7 +108,7 @@ simulations <- simulate_multiple_games(
 
 ## Advanced Usage
 
-In addition to full-game simulation, `NFLSimulator` exposes the individual components of the simulation engine for users who wish to build custom workflows or inspect intermediate decisions.
+In addition to full-game simulation, `NFLSimulateR` exposes the individual components of the simulation engine for users who wish to build custom workflows or inspect intermediate decisions.
 
 Examples include:
 
@@ -126,7 +126,7 @@ These functions can be combined to build custom simulations or to study individu
 
 ## Data Sources
 
-`NFLSimulator` uses publicly available NFL data together with PFF player grading data.
+`NFLSimulateR` uses publicly available NFL data together with PFF player grading data.
 
 Primary data sources include:
 
@@ -138,17 +138,17 @@ Primary data sources include:
 
 ## Citation
 
-If you use `NFLSimulator` in research or academic work, please cite the package using:
+If you use `NFLSimulateR` in research or academic work, please cite the package using:
 
 ```r
-citation("NFLSimulator")
+citation("NFLSimulateR")
 ```
 
 ---
 
 ## Development Status
 
-`NFLSimulator` is under active development. Planned additions include:
+`NFLSimulateR` is under active development. Planned additions include:
 
 * Special teams simulation
 * Improved clock management
