@@ -2,24 +2,63 @@
 % Please edit documentation in R/SimulatorFunctions.R
 \name{multiple_simulations}
 \alias{multiple_simulations}
-\title{Give multiple simulations}
+\title{Simulate Multiple NFL Games}
 \usage{
 multiple_simulations(team1, team2, year = 2025, n = 100, max_attempts = 3)
 }
 \arguments{
-\item{team1}{An NFL team}
+\item{team1}{Character string. A two- or three-letter NFL team abbreviation.
+Must be one of the following:
+\code{"ARI"}, \code{"ATL"}, \code{"BAL"}, \code{"BUF"}, \code{"CAR"},
+\code{"CHI"}, \code{"CIN"}, \code{"CLE"}, \code{"DAL"}, \code{"DEN"},
+\code{"DET"}, \code{"GB"}, \code{"HOU"}, \code{"IND"}, \code{"JAX"},
+\code{"KC"}, \code{"LA"}, \code{"LAC"}, \code{"LV"}, \code{"MIA"},
+\code{"MIN"}, \code{"NE"}, \code{"NO"}, \code{"NYG"}, \code{"NYJ"},
+\code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
+\code{"TEN"}, \code{"WAS"}.}
 
-\item{team2}{A different NFL team}
+\item{team2}{Character string. A two- or three-letter NFL team abbreviation.
+Must be one of the following:
+\code{"ARI"}, \code{"ATL"}, \code{"BAL"}, \code{"BUF"}, \code{"CAR"},
+\code{"CHI"}, \code{"CIN"}, \code{"CLE"}, \code{"DAL"}, \code{"DEN"},
+\code{"DET"}, \code{"GB"}, \code{"HOU"}, \code{"IND"}, \code{"JAX"},
+\code{"KC"}, \code{"LA"}, \code{"LAC"}, \code{"LV"}, \code{"MIA"},
+\code{"MIN"}, \code{"NE"}, \code{"NO"}, \code{"NYG"}, \code{"NYJ"},
+\code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
+\code{"TEN"}, \code{"WAS"}.
+Must be different from \code{team1}.}
 
-\item{year}{A year between 2024 and 2025}
+\item{year}{Numeric. Season year. Must be an integer between
+\code{2022} and \code{2025}.}
 
-\item{n}{Number of simulations desired}
+\item{n}{Integer. Number of game simulations to perform. The default is
+\code{100}.}
 
-\item{max_attempts}{Number of failed attempts allowed}
+\item{max_attempts}{Integer. Maximum number of failed simulation attempts
+allowed before stopping.}
 }
 \value{
-A data frame.
+A one-row data.frame summarizing the simulated games.
+\describe{
+\item{samplesize}{Number of successful simulations performed.}
+\item{team1}{Name of the first team.}
+\item{team1wins}{Number of simulations won by \code{team1}.}
+\item{team1mean}{Mean score of \code{team1} across all simulations.}
+\item{team1sd}{Standard deviation of \code{team1}'s scores.}
+\item{team2}{Name of the second team.}
+\item{team2wins}{Number of simulations won by \code{team2}.}
+\item{team2mean}{Mean score of \code{team2} across all simulations.}
+\item{team2sd}{Standard deviation of \code{team2}'s scores.}
+}
 }
 \description{
-Returns n simulated games for a given matchup and year.
+Simulates the same NFL matchup multiple times and summarizes the results.
+}
+\details{
+This function repeatedly calls \code{\link{simulate_game}} to simulate the
+specified matchup. Summary statistics are computed from the completed
+simulations, including the number of wins for each team and the mean and
+standard deviation of each team's score. Simulations that fail are retried
+until either \code{n} successful simulations have been completed or
+\code{max_attempts} consecutive failures have occurred.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/SimulatorFunctions.R
 \name{choose_def_personnel}
 \alias{choose_def_personnel}
-\title{Choose defensive personnel}
+\title{Choose Defensive Personnel}
 \usage{
 choose_def_personnel(
   down,
@@ -15,23 +15,42 @@ choose_def_personnel(
 )
 }
 \arguments{
-\item{down}{Current down.}
+\item{down}{Integer. Current down (\code{1}--\code{4}).}
 
-\item{togo}{Yards to go.}
+\item{togo}{Numeric. Yards needed to gain a first down.}
 
-\item{YdsBef}{Yards to end zone before the play.}
+\item{YdsBef}{Numeric. Yards from the line of scrimmage to the opponent's
+end zone before the play.}
 
-\item{posstmdiff}{Score differential for the possession team.}
+\item{posstmdiff}{Numeric. Score differential from the perspective of the
+team in possession (positive if leading, negative if trailing).}
 
-\item{quarter_secs}{Seconds remaining in the quarter.}
+\item{quarter_secs}{Numeric. Seconds remaining in the current quarter.}
 
-\item{quarter}{Current quarter.}
+\item{quarter}{Integer. Current quarter (\code{1}--\code{4}, with
+overtime represented by \code{5} if applicable).}
 
-\item{personnel}{The offensive personnel on field}
+\item{personnel}{Character string. Offensive personnel grouping returned by
+\code{\link{choose_personnel}}.}
 }
 \value{
-A character string.
+A character string representing the selected defensive personnel
+grouping. Possible values are \code{"2-5"}, \code{"3-4"}, \code{"4-3"},
+\code{"5-2"}, \code{"Nickel"}, \code{"Dime"}, and \code{"Heavy"}.
 }
 \description{
-Chooses defensive personnel for a simulated play.
+Predicts the defensive personnel grouping for a simulated play based on the
+current game situation and the offensive personnel on the field.
+}
+\details{
+Defensive personnel groupings correspond to common NFL defensive packages.
+Base fronts (e.g., \code{"4-3"} and \code{"3-4"}) indicate the number of
+defensive linemen and linebackers, while sub-packages such as
+\code{"Nickel"} and \code{"Dime"} replace linebackers with additional
+defensive backs to better defend against the pass.
+
+The returned personnel grouping is sampled from the predicted probability
+distribution produced by an XGBoost model trained on historical NFL
+play-by-play data. Predictions are conditioned on the current game state and
+the offensive personnel on the field.
 }

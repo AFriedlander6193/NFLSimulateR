@@ -2,7 +2,7 @@
 % Please edit documentation in R/SimulatorFunctions.R
 \name{choose_formation}
 \alias{choose_formation}
-\title{Choose offensive formation}
+\title{Choose Offensive Formation}
 \usage{
 choose_formation(
   down,
@@ -16,25 +16,48 @@ choose_formation(
 )
 }
 \arguments{
-\item{down}{Current down.}
+\item{down}{Integer. Current down (\code{1}--\code{4}).}
 
-\item{togo}{Yards to go.}
+\item{togo}{Numeric. Yards needed to gain a first down.}
 
-\item{YdsBef}{Yards to end zone before the play.}
+\item{YdsBef}{Numeric. Yards from the line of scrimmage to the opponent's
+end zone before the play.}
 
-\item{posstmdiff}{Score differential for the possession team.}
+\item{posstmdiff}{Numeric. Score differential from the perspective of the
+team in possession (positive if leading, negative if trailing).}
 
-\item{quarter_secs}{Seconds remaining in the quarter.}
+\item{quarter_secs}{Numeric. Seconds remaining in the current quarter.}
 
-\item{quarter}{Current quarter.}
+\item{quarter}{Integer. Current quarter (\code{1}--\code{4}, with
+overtime represented by \code{5} if applicable).}
 
-\item{personnel}{The offensive personnel on field}
+\item{personnel}{Character string. Offensive personnel grouping returned by
+\code{\link{choose_personnel}}.}
 
-\item{def_personnel}{The defensive personnel on field}
+\item{def_personnel}{Character string. Defensive personnel grouping returned
+by \code{\link{choose_def_personnel}}.}
 }
 \value{
-A character string.
+A character string representing the selected offensive formation.
+Possible values are \code{"EMPTY"}, \code{"I_FORM"},
+\code{"PISTOL"}, \code{"SHOTGUN"}, and \code{"SINGLEBACK"}.
 }
 \description{
-Chooses offensive formation for a simulated play.
+Predicts the offensive formation for a simulated play based on the current
+game situation and the offensive and defensive personnel on the field.
+}
+\details{
+Offensive formations describe the alignment of the offensive backfield and
+eligible receivers before the snap. For example, \code{"SHOTGUN"} places the
+quarterback several yards behind the center, \code{"PISTOL"} aligns the
+quarterback closer to the line of scrimmage with a running back directly
+behind, \code{"I_FORM"} places the quarterback under center with two
+running backs aligned in an "I" formation, \code{"SINGLEBACK"} places a
+single running back behind the quarterback under center, and
+\code{"EMPTY"} aligns no running backs in the backfield.
+
+The returned formation is sampled from the predicted probability
+distribution produced by an XGBoost model trained on historical NFL
+play-by-play data. Predictions are conditioned on the current game state,
+offensive personnel, and defensive personnel.
 }

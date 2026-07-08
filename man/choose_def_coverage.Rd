@@ -2,7 +2,7 @@
 % Please edit documentation in R/SimulatorFunctions.R
 \name{choose_def_coverage}
 \alias{choose_def_coverage}
-\title{Choose defensive coverage}
+\title{Choose Defensive Coverage}
 \usage{
 choose_def_coverage(
   down,
@@ -17,27 +17,51 @@ choose_def_coverage(
 )
 }
 \arguments{
-\item{down}{Current down.}
+\item{down}{Integer. Current down (\code{1}--\code{4}).}
 
-\item{togo}{Yards to go.}
+\item{togo}{Numeric. Yards needed to gain a first down.}
 
-\item{YdsBef}{Yards to end zone before the play.}
+\item{YdsBef}{Numeric. Yards from the line of scrimmage to the opponent's
+end zone before the play.}
 
-\item{posstmdiff}{Score differential for the possession team.}
+\item{posstmdiff}{Numeric. Score differential from the perspective of the
+team in possession (positive if leading, negative if trailing).}
 
-\item{quarter_secs}{Seconds remaining in the quarter.}
+\item{quarter_secs}{Numeric. Seconds remaining in the current quarter.}
 
-\item{quarter}{Current quarter.}
+\item{quarter}{Integer. Current quarter (\code{1}--\code{4}, with
+overtime represented by \code{5} if applicable).}
 
-\item{personnel}{The offensive personnel on field}
+\item{personnel}{Character string. Offensive personnel grouping returned by
+\code{\link{choose_personnel}}.}
 
-\item{def_personnel}{The defensive personnel on field}
+\item{def_personnel}{Character string. Defensive personnel grouping returned
+by \code{\link{choose_def_personnel}}.}
 
-\item{formation}{The offensive formation on field}
+\item{formation}{Character string. Offensive formation returned by
+\code{\link{choose_formation}}.}
 }
 \value{
-A character string.
+A character string representing the selected defensive coverage
+scheme. Possible values are \code{"Cover_0"}, \code{"Cover_1"},
+\code{"Cover_2"}, \code{"Cover_3"}, \code{"Cover_4"},
+\code{"Cover_6"}, \code{"Cover2Man"}, and \code{"RedZone"}.
 }
 \description{
-Chooses defensive coverage for a simulated play.
+Predicts the defensive coverage scheme for a simulated play based on the
+current game situation and the offensive and defensive alignments.
+}
+\details{
+Defensive coverage schemes describe how defenders are assigned to cover
+eligible receivers after the snap. Zone coverages such as
+\code{"Cover_2"}, \code{"Cover_3"}, \code{"Cover_4"}, and
+\code{"Cover_6"} divide the field into coverage responsibilities, whereas
+\code{"Cover_0"}, \code{"Cover_1"}, and \code{"Cover2Man"} rely primarily
+on man-to-man coverage. The \code{"RedZone"} coverage represents defensive
+coverages commonly used near the goal line.
+
+The returned coverage scheme is sampled from the predicted probability
+distribution produced by an XGBoost model trained on historical NFL
+play-by-play data. Predictions are conditioned on the current game state,
+offensive personnel, defensive personnel, and offensive formation.
 }

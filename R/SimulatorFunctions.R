@@ -5,7 +5,7 @@
 .nfl_env <- new.env(parent = emptyenv())
 
 loading_ext_data <- function() {
-  path <- system.file("extdata", package = "NFLSimulator")
+  path <- system.file("extdata", package = "NFLSimulateR")
   files <- list.files(path, pattern = "\\.rds$", full.names = TRUE)
 
   data_env <- new.env(parent = emptyenv())
@@ -150,7 +150,7 @@ PFF_data_grabber <- function(year, pos_file) {
   file_path <- system.file(
     "extdata",
     paste0("PFF_", pos_file, "_", year, ".rds"),
-    package = "NFLSimulator",
+    package = "NFLSimulateR",
     mustWork = TRUE
   )
 
@@ -341,7 +341,7 @@ PFF_data_creator <- function(year, pos) {
 #' metrics for the selected team. Each row corresponds to one player.
 #' \describe{
 #'   \item{final_position}{Simplified position group used by
-#'   \code{NFLSimulator} (e.g., QB, HB, WR, TE, OL, F7, DB).}
+#'   \code{NFLSimulateR} (e.g., QB, HB, WR, TE, OL, F7, DB).}
 #'   \item{pff_id}{Unique PFF player identifier.}
 #'   \item{player}{Player name.}
 #'   \item{year}{NFL season.}
@@ -377,7 +377,7 @@ PFF_data_creator <- function(year, pos) {
 #'#' @details
 #' This function combines team depth chart information with position-specific
 #' PFF grade and usage data. Positions are grouped into simplified categories
-#' used by \code{NFLSimulator}, such as \code{OL}, \code{F7}, and \code{DB}.
+#' used by \code{NFLSimulateR}, such as \code{OL}, \code{F7}, and \code{DB}.
 #' Some columns may contain missing values for positions where the statistic is
 #' not applicable.
 #'
@@ -435,7 +435,7 @@ PFF_grade_formulator <- function(offtm, deftm, year) {
 
 loading_ext_data <- function() {
 
-  path <- system.file("extdata", package = "NFLSimulator")
+  path <- system.file("extdata", package = "NFLSimulateR")
 
   files <- list.files(path, pattern = "\\.rds$", full.names = TRUE)
 
@@ -478,18 +478,38 @@ loading_ext_data <- function() {
 
 
 
-#' Choose offensive personnel
+#' Choose Offensive Personnel
 #'
-#' Chooses offensive personnel for a simulated play.
+#' Predicts the offensive personnel grouping for a simulated play based on the
+#' current game situation.
 #'
-#' @param down Current down.
-#' @param togo Yards to go.
-#' @param YdsBef Yards to end zone before the play.
-#' @param posstmdiff Score differential for the possession team.
-#' @param quarter_secs Seconds remaining in the quarter.
-#' @param quarter Current quarter.
+#' @param down Integer. Current down (\code{1}--\code{4}).
+#' @param togo Numeric. Yards needed to gain a first down.
+#' @param YdsBef Numeric. Yards from the line of scrimmage to the opponent's
+#'   end zone before the play.
+#' @param posstmdiff Numeric. Score differential from the perspective of the
+#'   team in possession (positive if leading, negative if trailing).
+#' @param quarter_secs Numeric. Seconds remaining in the current quarter.
+#' @param quarter Integer. Current quarter (\code{1}--\code{4}, with
+#'   overtime represented by \code{5} if applicable).
 #'
-#' @return A character string.
+#' @return A character string representing the selected offensive personnel
+#' grouping. Possible values are \code{"01"}, \code{"10"}, \code{"11"},
+#' \code{"12"}, \code{"13"}, \code{"21"}, and \code{"22"}.
+#'
+#' @details
+#' Personnel groupings follow standard NFL notation, where the first digit
+#' denotes the number of running backs and the second digit denotes the number
+#' of tight ends. The remaining eligible players are wide receivers. For
+#' example, \code{"11"} represents one running back, one tight end, and up to
+#' three wide receivers.
+#'
+#' The returned personnel grouping is sampled from the predicted probability
+#' distribution produced by an XGBoost model trained on historical NFL
+#' play-by-play data. Predictions are conditioned on the current game state,
+#' including down, distance, field position, score differential, quarter, and
+#' time remaining in the quarter.
+#'
 #' @export
 choose_personnel <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
                              quarter){
@@ -523,19 +543,39 @@ choose_personnel <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
 
 
 
-#' Choose defensive personnel
+#' Choose Defensive Personnel
 #'
-#' Chooses defensive personnel for a simulated play.
+#' Predicts the defensive personnel grouping for a simulated play based on the
+#' current game situation and the offensive personnel on the field.
 #'
-#' @param down Current down.
-#' @param togo Yards to go.
-#' @param YdsBef Yards to end zone before the play.
-#' @param posstmdiff Score differential for the possession team.
-#' @param quarter_secs Seconds remaining in the quarter.
-#' @param quarter Current quarter.
-#' @param personnel The offensive personnel on field
+#' @param down Integer. Current down (\code{1}--\code{4}).
+#' @param togo Numeric. Yards needed to gain a first down.
+#' @param YdsBef Numeric. Yards from the line of scrimmage to the opponent's
+#'   end zone before the play.
+#' @param posstmdiff Numeric. Score differential from the perspective of the
+#'   team in possession (positive if leading, negative if trailing).
+#' @param quarter_secs Numeric. Seconds remaining in the current quarter.
+#' @param quarter Integer. Current quarter (\code{1}--\code{4}, with
+#'   overtime represented by \code{5} if applicable).
+#' @param personnel Character string. Offensive personnel grouping returned by
+#'   \code{\link{choose_personnel}}.
 #'
-#' @return A character string.
+#' @return A character string representing the selected defensive personnel
+#' grouping. Possible values are \code{"2-5"}, \code{"3-4"}, \code{"4-3"},
+#' \code{"5-2"}, \code{"Nickel"}, \code{"Dime"}, and \code{"Heavy"}.
+#'
+#' @details
+#' Defensive personnel groupings correspond to common NFL defensive packages.
+#' Base fronts (e.g., \code{"4-3"} and \code{"3-4"}) indicate the number of
+#' defensive linemen and linebackers, while sub-packages such as
+#' \code{"Nickel"} and \code{"Dime"} replace linebackers with additional
+#' defensive backs to better defend against the pass.
+#'
+#' The returned personnel grouping is sampled from the predicted probability
+#' distribution produced by an XGBoost model trained on historical NFL
+#' play-by-play data. Predictions are conditioned on the current game state and
+#' the offensive personnel on the field.
+#'
 #' @export
 choose_def_personnel <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
                                  quarter, personnel){
@@ -575,20 +615,44 @@ choose_def_personnel <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
 
 
 
-#' Choose offensive formation
+#' Choose Offensive Formation
 #'
-#' Chooses offensive formation for a simulated play.
+#' Predicts the offensive formation for a simulated play based on the current
+#' game situation and the offensive and defensive personnel on the field.
 #'
-#' @param down Current down.
-#' @param togo Yards to go.
-#' @param YdsBef Yards to end zone before the play.
-#' @param posstmdiff Score differential for the possession team.
-#' @param quarter_secs Seconds remaining in the quarter.
-#' @param quarter Current quarter.
-#' @param personnel The offensive personnel on field
-#' @param def_personnel The defensive personnel on field
+#' @param down Integer. Current down (\code{1}--\code{4}).
+#' @param togo Numeric. Yards needed to gain a first down.
+#' @param YdsBef Numeric. Yards from the line of scrimmage to the opponent's
+#'   end zone before the play.
+#' @param posstmdiff Numeric. Score differential from the perspective of the
+#'   team in possession (positive if leading, negative if trailing).
+#' @param quarter_secs Numeric. Seconds remaining in the current quarter.
+#' @param quarter Integer. Current quarter (\code{1}--\code{4}, with
+#'   overtime represented by \code{5} if applicable).
+#' @param personnel Character string. Offensive personnel grouping returned by
+#'   \code{\link{choose_personnel}}.
+#' @param def_personnel Character string. Defensive personnel grouping returned
+#'   by \code{\link{choose_def_personnel}}.
 #'
-#' @return A character string.
+#' @return A character string representing the selected offensive formation.
+#' Possible values are \code{"EMPTY"}, \code{"I_FORM"},
+#' \code{"PISTOL"}, \code{"SHOTGUN"}, and \code{"SINGLEBACK"}.
+#'
+#' @details
+#' Offensive formations describe the alignment of the offensive backfield and
+#' eligible receivers before the snap. For example, \code{"SHOTGUN"} places the
+#' quarterback several yards behind the center, \code{"PISTOL"} aligns the
+#' quarterback closer to the line of scrimmage with a running back directly
+#' behind, \code{"I_FORM"} places the quarterback under center with two
+#' running backs aligned in an "I" formation, \code{"SINGLEBACK"} places a
+#' single running back behind the quarterback under center, and
+#' \code{"EMPTY"} aligns no running backs in the backfield.
+#'
+#' The returned formation is sampled from the predicted probability
+#' distribution produced by an XGBoost model trained on historical NFL
+#' play-by-play data. Predictions are conditioned on the current game state,
+#' offensive personnel, and defensive personnel.
+#'
 #' @export
 choose_formation <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
                              quarter, personnel, def_personnel){
@@ -634,21 +698,46 @@ choose_formation <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
 
 
 
-#' Choose defensive coverage
+#' Choose Defensive Coverage
 #'
-#' Chooses defensive coverage for a simulated play.
+#' Predicts the defensive coverage scheme for a simulated play based on the
+#' current game situation and the offensive and defensive alignments.
 #'
-#' @param down Current down.
-#' @param togo Yards to go.
-#' @param YdsBef Yards to end zone before the play.
-#' @param posstmdiff Score differential for the possession team.
-#' @param quarter_secs Seconds remaining in the quarter.
-#' @param quarter Current quarter.
-#' @param personnel The offensive personnel on field
-#' @param def_personnel The defensive personnel on field
-#' @param formation The offensive formation on field
+#' @param down Integer. Current down (\code{1}--\code{4}).
+#' @param togo Numeric. Yards needed to gain a first down.
+#' @param YdsBef Numeric. Yards from the line of scrimmage to the opponent's
+#'   end zone before the play.
+#' @param posstmdiff Numeric. Score differential from the perspective of the
+#'   team in possession (positive if leading, negative if trailing).
+#' @param quarter_secs Numeric. Seconds remaining in the current quarter.
+#' @param quarter Integer. Current quarter (\code{1}--\code{4}, with
+#'   overtime represented by \code{5} if applicable).
+#' @param personnel Character string. Offensive personnel grouping returned by
+#'   \code{\link{choose_personnel}}.
+#' @param def_personnel Character string. Defensive personnel grouping returned
+#'   by \code{\link{choose_def_personnel}}.
+#' @param formation Character string. Offensive formation returned by
+#'   \code{\link{choose_formation}}.
 #'
-#' @return A character string.
+#' @return A character string representing the selected defensive coverage
+#' scheme. Possible values are \code{"Cover_0"}, \code{"Cover_1"},
+#' \code{"Cover_2"}, \code{"Cover_3"}, \code{"Cover_4"},
+#' \code{"Cover_6"}, \code{"Cover2Man"}, and \code{"RedZone"}.
+#'
+#' @details
+#' Defensive coverage schemes describe how defenders are assigned to cover
+#' eligible receivers after the snap. Zone coverages such as
+#' \code{"Cover_2"}, \code{"Cover_3"}, \code{"Cover_4"}, and
+#' \code{"Cover_6"} divide the field into coverage responsibilities, whereas
+#' \code{"Cover_0"}, \code{"Cover_1"}, and \code{"Cover2Man"} rely primarily
+#' on man-to-man coverage. The \code{"RedZone"} coverage represents defensive
+#' coverages commonly used near the goal line.
+#'
+#' The returned coverage scheme is sampled from the predicted probability
+#' distribution produced by an XGBoost model trained on historical NFL
+#' play-by-play data. Predictions are conditioned on the current game state,
+#' offensive personnel, defensive personnel, and offensive formation.
+#'
 #' @export
 choose_def_coverage <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
                                 quarter, personnel, def_personnel, formation){
@@ -701,22 +790,39 @@ choose_def_coverage <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
 
 
 
-#' Choose run or pass
+#' Choose Run or Pass
 #'
-#' Chooses run or pass for a simulated play.
+#' Predicts whether the offense will call a running or passing play based on
+#' the current game situation and the offensive and defensive alignments.
 #'
-#' @param down Current down.
-#' @param togo Yards to go.
-#' @param YdsBef Yards to end zone before the play.
-#' @param posstmdiff Score differential for the possession team.
-#' @param quarter_secs Seconds remaining in the quarter.
-#' @param quarter Current quarter.
-#' @param personnel The offensive personnel on field
-#' @param def_personnel The defensive personnel on field
-#' @param formation The offensive formation on field
-#' @param coverage The defensive coverage on field
+#' @param down Integer. Current down (\code{1}--\code{4}).
+#' @param togo Numeric. Yards needed to gain a first down.
+#' @param YdsBef Numeric. Yards from the line of scrimmage to the opponent's
+#'   end zone before the play.
+#' @param posstmdiff Numeric. Score differential from the perspective of the
+#'   team in possession (positive if leading, negative if trailing).
+#' @param quarter_secs Numeric. Seconds remaining in the current quarter.
+#' @param quarter Integer. Current quarter (\code{1}--\code{4}, with
+#'   overtime represented by \code{5} if applicable).
+#' @param personnel Character string. Offensive personnel grouping returned by
+#'   \code{\link{choose_personnel}}.
+#' @param def_personnel Character string. Defensive personnel grouping returned
+#'   by \code{\link{choose_def_personnel}}.
+#' @param formation Character string. Offensive formation returned by
+#'   \code{\link{choose_formation}}.
+#' @param coverage Character string. Defensive coverage scheme returned by
+#'   \code{\link{choose_def_coverage}}.
 #'
-#' @return A character string.
+#' @return A character string representing the selected play type:
+#' \code{"Run"} or \code{"Pass"}.
+#'
+#' @details
+#' The returned play type is sampled from the predicted probability
+#' distribution produced by an XGBoost model trained on historical NFL
+#' play-by-play data. Predictions are conditioned on the current game state,
+#' offensive personnel, defensive personnel, offensive formation, and
+#' defensive coverage.
+#'
 #' @export
 runorpass <- function(down, togo, YdsBef, posstmdiff, quarter_secs,
                       quarter, personnel, formation, def_personnel, coverage){
@@ -1140,7 +1246,7 @@ routeselection <- function(posstm, deftm, down, togo, YdsBef, posstmdiff,
     rushplayer <- sample(potential_rush_posdf$pff_id, 1, prob = rushposprobs)
     rushpos <- potential_rush_posdf$position[potential_rush_posdf$pff_id==rushplayer]
 
-    rest_of_offense <- c(onfieldQB, onfieldRBS, onfieldWRS, onfieldTES)
+    rest_of_offense <- c(onfieldRBS, onfieldWRS, onfieldTES)
     rest_of_offense <- rest_of_offense[-which(rest_of_offense==rushplayer)]
 
     frontsevenamount <- suppressWarnings(case_when(
@@ -1175,25 +1281,80 @@ routeselection <- function(posstm, deftm, down, togo, YdsBef, posstmdiff,
 }
 
 
-#' Give play details
+#' Generate Play Details
 #'
-#' Returns play details for a simulated play.
+#' Generates offensive and defensive personnel, alignments, player assignments,
+#' and play-specific details for a simulated NFL play.
 #'
-#' @param posstm Team with possession of the ball.
-#' @param deftm Team on defense
-#' @param down Current down.
-#' @param togo Yards to go.
-#' @param YdsBef Yards to end zone before the play.
-#' @param posstmdiff Score differential for the possession team.
-#' @param quarter_secs Seconds remaining in the quarter.
-#' @param quarter Current quarter.
-#' @param off_dat The PFF data frame for the offensive team
-#' @param def_dat The PFF data frame for the defensive team
-#' @param year A year between 2024 and 2025
+#' @param posstm Character string. Team abbreviation for the team with
+#'   possession of the ball.
+#' @param deftm Character string. Team abbreviation for the defensive team.
+#' @param down Integer. Current down (\code{1}--\code{4}).
+#' @param togo Numeric. Yards needed to gain a first down.
+#' @param YdsBef Numeric. Yards from the line of scrimmage to the opponent's
+#'   end zone before the play.
+#' @param posstmdiff Numeric. Score differential from the perspective of the
+#'   team in possession (positive if leading, negative if trailing).
+#' @param quarter_secs Numeric. Seconds remaining in the current quarter.
+#' @param quarter Integer. Current quarter (\code{1}--\code{4}, with overtime
+#'   represented by \code{5} if applicable).
+#' @param off_dat A data.frame containing PFF player grades and usage metrics
+#'   for the offensive team, such as the output of \code{\link{full_PFF}}.
+#' @param def_dat A data.frame containing PFF player grades and usage metrics
+#'   for the defensive team, such as the output of \code{\link{full_PFF}}.
+#' @param year Numeric. Season year. Must be either \code{2024} or \code{2025}.
 #'
-#' @return A named list.
+#' @return A named list containing simulated play details. All outputs include:
+#' \describe{
+#'   \item{pers}{Selected offensive personnel grouping.}
+#'   \item{form}{Selected offensive formation.}
+#'   \item{runorpass}{Selected play type, either \code{"Run"} or \code{"Pass"}.}
+#'   \item{def_pers}{Selected defensive personnel grouping.}
+#'   \item{coverage}{Selected defensive coverage scheme.}
+#' }
+#'
+#' If \code{runorpass = "Run"}, the list also contains:
+#' \describe{
+#'   \item{rushpos}{Position of the rushing player, usually \code{"HB"} or
+#'   \code{"QB"}.}
+#'   \item{rushplayer}{PFF identifier for the rushing player.}
+#'   \item{quarterback}{PFF identifier for the quarterback on the field.}
+#'   \item{rest_of_offense}{PFF identifiers for eligible offensive players who
+#'   are not the rushing player, quarterback, or offensive linemen.}
+#'   \item{oline}{PFF identifiers for offensive linemen on the field.}
+#'   \item{defense}{PFF identifiers for defensive players on the field.}
+#' }
+#'
+#' If \code{runorpass = "Pass"}, the list also contains:
+#' \describe{
+#'   \item{route_combo}{Route combination identifier selected by the route
+#'   combination model.}
+#'   \item{quarterback}{PFF identifier for the quarterback on the field.}
+#'   \item{routesran}{Number of routes run on the play.}
+#'   \item{oline}{PFF identifiers for offensive linemen on the field.}
+#'   \item{passrushers}{PFF identifiers for defensive players rushing the
+#'   passer.}
+#'   \item{coveringtgtplayer}{PFF identifier for the defensive player covering
+#'   the targeted receiver.}
+#'   \item{othercoverplayers}{PFF identifiers for defensive players who are not
+#'   rushing the passer or covering the targeted receiver.}
+#'   \item{tgt_route}{Targeted route. Possible values include \code{"ANGLE"},
+#'   \code{"CORNER"}, \code{"CROSS"}, \code{"FLAT"}, \code{"GO"},
+#'   \code{"HITCH"}, \code{"IN"}, \code{"OUT"}, \code{"POST"},
+#'   \code{"SCREEN"}, \code{"SLANT"}, and \code{"WHEEL"}.}
+#'   \item{tgt_pos}{Position of the targeted player, such as \code{"RB"},
+#'   \code{"WR"}, or \code{"TE"}.}
+#'   \item{tgt_player}{PFF identifier for the targeted player.}
+#' }
+#'
+#' @details
+#' This function combines the simulator's sequential decision models to generate
+#' the full set of play-level inputs needed for a simulated outcome. It first
+#' samples personnel, formation, coverage, and play type, then assigns players
+#' and play-specific roles based on whether the simulated play is a run or pass.
+#'
 #' @export
-routeselection1 <- function(posstm, deftm, down, togo, YdsBef, posstmdiff, quarter_secs, quarter,
+generate_play_details <- function(posstm, deftm, down, togo, YdsBef, posstmdiff, quarter_secs, quarter,
                                off_dat, def_dat, year){
   data_env <- get_data_env()
 
@@ -1223,7 +1384,7 @@ yardsgained <- function(posstm, deftm, down, togo, YdsBef, posstmdiff, quarter_s
                         off_dat, def_dat, year){
   data_env <- get_data_env()
 
-  output <- suppressWarnings(routeselection1(posstm, deftm, down, togo,
+  output <- suppressWarnings(generate_play_details(posstm, deftm, down, togo,
                                                 YdsBef, posstmdiff, quarter_secs, quarter,
                                                 off_dat, def_dat, year))
   whole_offense <- off_dat
@@ -1539,25 +1700,60 @@ yardsgained <- function(posstm, deftm, down, togo, YdsBef, posstmdiff, quarter_s
 }
 
 
-#' Give yards gained
+#' Simulate Yards Gained
 #'
-#' Returns yards gained for a simulated play.
+#' Simulates the outcome of an offensive play and returns the resulting play
+#' type, play result, and net yards gained.
 #'
-#' @param posstm Team with possession of the ball.
-#' @param deftm Team on defense
-#' @param down Current down.
-#' @param togo Yards to go.
-#' @param YdsBef Yards to end zone before the play.
-#' @param posstmdiff Score differential for the possession team.
-#' @param quarter_secs Seconds remaining in the quarter.
-#' @param quarter Current quarter.
-#' @param off_dat The PFF data frame for the offensive team
-#' @param def_dat The PFF data frame for the defensive team
-#' @param year A year between 2024 and 2025
+#' @param posstm Character string. Team abbreviation for the team with
+#'   possession of the ball.
+#' @param deftm Character string. Team abbreviation for the defensive team.
+#' @param down Integer. Current down (\code{1}--\code{4}).
+#' @param togo Numeric. Yards needed to gain a first down.
+#' @param YdsBef Numeric. Yards from the line of scrimmage to the opponent's
+#'   end zone before the play.
+#' @param posstmdiff Numeric. Score differential from the perspective of the
+#'   team in possession (positive if leading, negative if trailing).
+#' @param quarter_secs Numeric. Seconds remaining in the current quarter.
+#' @param quarter Integer. Current quarter (\code{1}--\code{4}, with overtime
+#'   represented by \code{5} if applicable).
+#' @param off_dat A data.frame containing PFF player grades and usage metrics
+#'   for the offensive team, such as the output of \code{\link{full_PFF}}.
+#' @param def_dat A data.frame containing PFF player grades and usage metrics
+#'   for the defensive team, such as the output of \code{\link{full_PFF}}.
+#' @param year Numeric. Season year. Must be either \code{2024} or
+#'   \code{2025}.
 #'
-#' @return A named list.
+#' @return A named list with the following components:
+#' \describe{
+#'   \item{runpass}{Play type, either \code{"Run"} or \code{"Pass"}.}
+#'   \item{result}{The simulated play result.}
+#'   \item{yards}{Net yards gained on the play. Negative values indicate a loss
+#'   of yardage. On turnovers or fumbles, this value includes any return
+#'   yardage.}
+#' }
+#'
+#' Possible values of \code{result} are:
+#' \itemize{
+#'   \item Run plays: \code{"No_Fumble"} or \code{"Fumble"}.
+#'   \item Pass plays: \code{"Complete"}, \code{"Incomplete"},
+#'   \code{"Sack"}, \code{"Interception"},
+#'   \code{"Sack_Fumble_Retained"},
+#'   \code{"Sack_Fumble_Lost"},
+#'   \code{"Complete_Fumble_Retained"}, or
+#'   \code{"Complete_Fumble_Lost"}.
+#' }
+#'
+#' @details
+#' This function first generates play details using
+#' \code{\link{generate_play_details}}, then sequentially simulates each stage
+#' of the play (e.g., sack, completion, interception, fumble, and yards after
+#' catch or contact) using statistical models trained on historical NFL
+#' play-by-play data. The returned yardage represents the final net result of
+#' the simulated play.
+#'
 #' @export
-yardsgained1 <- function(posstm, deftm, down, togo, YdsBef, posstmdiff, quarter_secs, quarter,
+simulate_yards_gained <- function(posstm, deftm, down, togo, YdsBef, posstmdiff, quarter_secs, quarter,
                             off_dat, def_dat, year){
   data_env <- get_data_env()
 
@@ -1581,19 +1777,55 @@ yardsgained1 <- function(posstm, deftm, down, togo, YdsBef, posstmdiff, quarter_
 # }
 
 
-#' Simulates an NFL football game
+#' Simulate an NFL Game
 #'
-#' Returns a simulated game for a provided matchup and year.
+#' Simulates a complete NFL game between two teams using statistical models
+#' trained on historical NFL play-by-play and PFF player data. Each play is
+#' generated sequentially by simulating personnel, formations, coverages,
+#' play type, player assignments, and play outcomes.
 #'
-#' @param team1 An NFL team
-#' @param team2 A different NFL team
-#' @param year A year between 2024 and 2025
-#' @param track Allows the user to decide whether to track the game or not
+#' @param team1 Character string. A two- or three-letter NFL team abbreviation.
+#'   Must be one of the following:
+#'   \code{"ARI"}, \code{"ATL"}, \code{"BAL"}, \code{"BUF"}, \code{"CAR"},
+#'   \code{"CHI"}, \code{"CIN"}, \code{"CLE"}, \code{"DAL"}, \code{"DEN"},
+#'   \code{"DET"}, \code{"GB"}, \code{"HOU"}, \code{"IND"}, \code{"JAX"},
+#'   \code{"KC"}, \code{"LA"}, \code{"LAC"}, \code{"LV"}, \code{"MIA"},
+#'   \code{"MIN"}, \code{"NE"}, \code{"NO"}, \code{"NYG"}, \code{"NYJ"},
+#'   \code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
+#'   \code{"TEN"}, \code{"WAS"}.
 #'
-#' @return A data frame.
+#' @param team2 Character string. A two- or three-letter NFL team abbreviation.
+#'   Must be one of the following:
+#'   \code{"ARI"}, \code{"ATL"}, \code{"BAL"}, \code{"BUF"}, \code{"CAR"},
+#'   \code{"CHI"}, \code{"CIN"}, \code{"CLE"}, \code{"DAL"}, \code{"DEN"},
+#'   \code{"DET"}, \code{"GB"}, \code{"HOU"}, \code{"IND"}, \code{"JAX"},
+#'   \code{"KC"}, \code{"LA"}, \code{"LAC"}, \code{"LV"}, \code{"MIA"},
+#'   \code{"MIN"}, \code{"NE"}, \code{"NO"}, \code{"NYG"}, \code{"NYJ"},
+#'   \code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
+#'   \code{"TEN"}, \code{"WAS"}.
+#'   Must be different from \code{team1}.
+#' @param year Numeric. Season year. Must be an integer between
+#'   \code{2022} and \code{2025}.
+#' @param track Character string indicating whether to print the simulated
+#'   play-by-play to the console. Accepted values are
+#'   \code{"yes"}, \code{"Yes"}, \code{"YES"},
+#'   \code{"no"}, \code{"No"}, and \code{"NO"}.
+#'   The default is \code{"no"}.
+#'
+#' @return A one-row data.frame containing the simulated final score. The
+#' column names correspond to the two teams provided, and the values are the
+#' simulated final scores.
+#'
+#' @details
+#' The simulation proceeds one play at a time until the game is complete.
+#' Offensive personnel, defensive personnel, formations, coverages, play type,
+#' player assignments, and play outcomes are sampled from probability
+#' distributions estimated from historical NFL data. Player-specific PFF grades
+#' are incorporated throughout the simulation to produce realistic team and
+#' player behavior.
+#'
 #' @export
-#' @export
-simulator <- function(team1, team2, year = 2025, track = "NO") {
+simulate_game <- function(team1, team2, year = 2025, track = "NO") {
 
   data_env <- get_data_env()
 
@@ -1976,7 +2208,7 @@ simulator <- function(team1, team2, year = 2025, track = "NO") {
     if((game_state$down!=4 | game_state$option=="goforit") &
        game_state$option!="field goal attempt"){
 
-      play <- yardsgained1(game_state$posstm, game_state$deftm, game_state$down,
+      play <- simulate_yards_gained(game_state$posstm, game_state$deftm, game_state$down,
                               game_state$togo, game_state$ydsbef, game_state$posstmmargin,
                               game_state$quartersecondsleft, game_state$quarter,
                               off_dat = off_dat, def_dat = def_dat, year = year)
@@ -2173,23 +2405,68 @@ simulator <- function(team1, team2, year = 2025, track = "NO") {
       print(game_state$scoredf)
     }
   }
-  return(game_state$scoredf)
+  finalscoredf <- game_state$scoredf[7:8]
+  return(finalscoredf)
 }
 
 # simulator("DEN", "SEA", year = 2025, track = "YES")
 
 
-#' Give multiple simulations
+#' Simulate Multiple NFL Games
 #'
-#' Returns n simulated games for a given matchup and year.
+#' Simulates the same NFL matchup multiple times and summarizes the results.
 #'
-#' @param team1 An NFL team
-#' @param team2 A different NFL team
-#' @param year A year between 2024 and 2025
-#' @param n Number of simulations desired
-#' @param max_attempts Number of failed attempts allowed
+#' @param team1 Character string. A two- or three-letter NFL team abbreviation.
+#'   Must be one of the following:
+#'   \code{"ARI"}, \code{"ATL"}, \code{"BAL"}, \code{"BUF"}, \code{"CAR"},
+#'   \code{"CHI"}, \code{"CIN"}, \code{"CLE"}, \code{"DAL"}, \code{"DEN"},
+#'   \code{"DET"}, \code{"GB"}, \code{"HOU"}, \code{"IND"}, \code{"JAX"},
+#'   \code{"KC"}, \code{"LA"}, \code{"LAC"}, \code{"LV"}, \code{"MIA"},
+#'   \code{"MIN"}, \code{"NE"}, \code{"NO"}, \code{"NYG"}, \code{"NYJ"},
+#'   \code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
+#'   \code{"TEN"}, \code{"WAS"}.
 #'
-#' @return A data frame.
+#' @param team2 Character string. A two- or three-letter NFL team abbreviation.
+#'   Must be one of the following:
+#'   \code{"ARI"}, \code{"ATL"}, \code{"BAL"}, \code{"BUF"}, \code{"CAR"},
+#'   \code{"CHI"}, \code{"CIN"}, \code{"CLE"}, \code{"DAL"}, \code{"DEN"},
+#'   \code{"DET"}, \code{"GB"}, \code{"HOU"}, \code{"IND"}, \code{"JAX"},
+#'   \code{"KC"}, \code{"LA"}, \code{"LAC"}, \code{"LV"}, \code{"MIA"},
+#'   \code{"MIN"}, \code{"NE"}, \code{"NO"}, \code{"NYG"}, \code{"NYJ"},
+#'   \code{"PHI"}, \code{"PIT"}, \code{"SEA"}, \code{"SF"}, \code{"TB"},
+#'   \code{"TEN"}, \code{"WAS"}.
+#'   Must be different from \code{team1}.
+#'
+#' @param year Numeric. Season year. Must be an integer between
+#'   \code{2022} and \code{2025}.
+#'
+#' @param n Integer. Number of game simulations to perform. The default is
+#'   \code{100}.
+#'
+#' @param max_attempts Integer. Maximum number of failed simulation attempts
+#'   allowed before stopping.
+#'
+#' @return A one-row data.frame summarizing the simulated games.
+#' \describe{
+#'   \item{samplesize}{Number of successful simulations performed.}
+#'   \item{team1}{Name of the first team.}
+#'   \item{team1wins}{Number of simulations won by \code{team1}.}
+#'   \item{team1mean}{Mean score of \code{team1} across all simulations.}
+#'   \item{team1sd}{Standard deviation of \code{team1}'s scores.}
+#'   \item{team2}{Name of the second team.}
+#'   \item{team2wins}{Number of simulations won by \code{team2}.}
+#'   \item{team2mean}{Mean score of \code{team2} across all simulations.}
+#'   \item{team2sd}{Standard deviation of \code{team2}'s scores.}
+#' }
+#'
+#' @details
+#' This function repeatedly calls \code{\link{simulate_game}} to simulate the
+#' specified matchup. Summary statistics are computed from the completed
+#' simulations, including the number of wins for each team and the mean and
+#' standard deviation of each team's score. Simulations that fail are retried
+#' until either \code{n} successful simulations have been completed or
+#' \code{max_attempts} consecutive failures have occurred.
+#'
 #' @export
 multiple_simulations <- function(team1, team2, year = 2025,
                                  n = 100, max_attempts = 3) {
@@ -2209,7 +2486,7 @@ multiple_simulations <- function(team1, team2, year = 2025,
     # Try with time limit
     try_result <- try({
       setTimeLimit(elapsed = 240, transient = TRUE)  # 4 minutes = 240 seconds
-      res <- simulator(team1, team2, year)
+      res <- simulate_game(team1, team2, year)
       setTimeLimit(elapsed = Inf, transient = TRUE)  # Reset time limit
     }, silent = TRUE)
 
