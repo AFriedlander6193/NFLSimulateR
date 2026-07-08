@@ -2,26 +2,45 @@
 % Please edit documentation in R/SimulatorFunctions.R
 \name{choose_personnel}
 \alias{choose_personnel}
-\title{Choose offensive personnel}
+\title{Choose Offensive Personnel}
 \usage{
 choose_personnel(down, togo, YdsBef, posstmdiff, quarter_secs, quarter)
 }
 \arguments{
-\item{down}{Current down.}
+\item{down}{Integer. Current down (\code{1}--\code{4}).}
 
-\item{togo}{Yards to go.}
+\item{togo}{Numeric. Yards needed to gain a first down.}
 
-\item{YdsBef}{Yards to end zone before the play.}
+\item{YdsBef}{Numeric. Yards from the line of scrimmage to the opponent's
+end zone before the play.}
 
-\item{posstmdiff}{Score differential for the possession team.}
+\item{posstmdiff}{Numeric. Score differential from the perspective of the
+team in possession (positive if leading, negative if trailing).}
 
-\item{quarter_secs}{Seconds remaining in the quarter.}
+\item{quarter_secs}{Numeric. Seconds remaining in the current quarter.}
 
-\item{quarter}{Current quarter.}
+\item{quarter}{Integer. Current quarter (\code{1}--\code{4}, with
+overtime represented by \code{5} if applicable).}
 }
 \value{
-A character string.
+A character string representing the selected offensive personnel
+grouping. Possible values are \code{"01"}, \code{"10"}, \code{"11"},
+\code{"12"}, \code{"13"}, \code{"21"}, and \code{"22"}.
 }
 \description{
-Chooses offensive personnel for a simulated play.
+Predicts the offensive personnel grouping for a simulated play based on the
+current game situation.
+}
+\details{
+Personnel groupings follow standard NFL notation, where the first digit
+denotes the number of running backs and the second digit denotes the number
+of tight ends. The remaining eligible players are wide receivers. For
+example, \code{"11"} represents one running back, one tight end, and up to
+three wide receivers.
+
+The returned personnel grouping is sampled from the predicted probability
+distribution produced by an XGBoost model trained on historical NFL
+play-by-play data. Predictions are conditioned on the current game state,
+including down, distance, field position, score differential, quarter, and
+time remaining in the quarter.
 }

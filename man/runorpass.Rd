@@ -2,7 +2,7 @@
 % Please edit documentation in R/SimulatorFunctions.R
 \name{runorpass}
 \alias{runorpass}
-\title{Choose run or pass}
+\title{Choose Run or Pass}
 \usage{
 runorpass(
   down,
@@ -18,29 +18,45 @@ runorpass(
 )
 }
 \arguments{
-\item{down}{Current down.}
+\item{down}{Integer. Current down (\code{1}--\code{4}).}
 
-\item{togo}{Yards to go.}
+\item{togo}{Numeric. Yards needed to gain a first down.}
 
-\item{YdsBef}{Yards to end zone before the play.}
+\item{YdsBef}{Numeric. Yards from the line of scrimmage to the opponent's
+end zone before the play.}
 
-\item{posstmdiff}{Score differential for the possession team.}
+\item{posstmdiff}{Numeric. Score differential from the perspective of the
+team in possession (positive if leading, negative if trailing).}
 
-\item{quarter_secs}{Seconds remaining in the quarter.}
+\item{quarter_secs}{Numeric. Seconds remaining in the current quarter.}
 
-\item{quarter}{Current quarter.}
+\item{quarter}{Integer. Current quarter (\code{1}--\code{4}, with
+overtime represented by \code{5} if applicable).}
 
-\item{personnel}{The offensive personnel on field}
+\item{personnel}{Character string. Offensive personnel grouping returned by
+\code{\link{choose_personnel}}.}
 
-\item{formation}{The offensive formation on field}
+\item{formation}{Character string. Offensive formation returned by
+\code{\link{choose_formation}}.}
 
-\item{def_personnel}{The defensive personnel on field}
+\item{def_personnel}{Character string. Defensive personnel grouping returned
+by \code{\link{choose_def_personnel}}.}
 
-\item{coverage}{The defensive coverage on field}
+\item{coverage}{Character string. Defensive coverage scheme returned by
+\code{\link{choose_def_coverage}}.}
 }
 \value{
-A character string.
+A character string representing the selected play type:
+\code{"Run"} or \code{"Pass"}.
 }
 \description{
-Chooses run or pass for a simulated play.
+Predicts whether the offense will call a running or passing play based on
+the current game situation and the offensive and defensive alignments.
+}
+\details{
+The returned play type is sampled from the predicted probability
+distribution produced by an XGBoost model trained on historical NFL
+play-by-play data. Predictions are conditioned on the current game state,
+offensive personnel, defensive personnel, offensive formation, and
+defensive coverage.
 }
