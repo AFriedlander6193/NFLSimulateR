@@ -2468,11 +2468,13 @@ simulate_game <- function(team1, team2, year = 2025, week = 1, track = FALSE,
 
       if (length(possessions_tracker) == 2 && game_state$posstmmargin != 0) {
         finalscoredf <- game_state$scoredf[7:8]
+        break
       }
     }
 
     if (game_state$quarter == 6) {
       finalscoredf <- game_state$scoredf[7:8]
+      break
     }
     ##
 
