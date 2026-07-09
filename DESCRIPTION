@@ -3,10 +3,7 @@ Title: NFL Game Simulation Using Statistical and Machine Learning Models
 Version: 0.3.0
 Authors@R: 
     person("Aaron", "Friedlander", , "aaronfriedlandergradschool@gmail.com", role = c("aut", "cre"))
-Description: Simulates NFL games using play-by-play modeling and player performance data. 
-The package generates realistic game outcomes by modeling offensive and defensive decisions, 
-player personnel, formations, coverages, and individual plays, allowing users to simulate 
-individual games, multiple game iterations, or entire weeks of NFL matchups.
+Description: Simulates NFL games using play-by-play modeling and player performance data. The package generates realistic game outcomes by modeling offensive and defensive decisions, player personnel, formations, coverages, and individual plays, allowing users to simulate individual games, multiple game iterations, or entire weeks of NFL matchups.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
