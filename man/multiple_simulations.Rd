@@ -9,6 +9,7 @@ multiple_simulations(
   team2,
   year = 2025,
   week = 1,
+  offseason = FALSE,
   n = 100,
   max_attempts = 3
 )
@@ -42,6 +43,8 @@ Must be different from \code{team1}.}
 Must be an integer between \code{1} and \code{18}. The specified week
 determines the active rosters, depth charts, and player PFF grades used
 during the simulation.}
+
+\item{offseason}{Logical. Indicates if it is currently the NFL offseason}
 
 \item{n}{Integer. Number of game simulations to perform. The default is
 \code{100}.}

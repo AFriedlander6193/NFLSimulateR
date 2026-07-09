@@ -76,6 +76,8 @@ age_joiner <- function(pff_data){
 #' @param week Numeric. Week of the regular season. Must be an integer
 #'   between \code{1} and \code{18}.
 #'
+#' @param offseason Logical. Indicates if it is currently the NFL offseason
+#'
 #' @return A data.frame with one row per player on the team's depth chart.
 #' \describe{
 #'   \item{position}{Position from the official NFL depth chart.}
@@ -92,7 +94,7 @@ age_joiner <- function(pff_data){
 #'
 #'
 #' @export
-depthchart <- function(tm, year = 2025, week = 1){
+depthchart <- function(tm, year = 2025, week = 1, offseason = FALSE){
 
   game_dates <- c(
     "-09-04", "-09-11", "-09-18", "-09-25",
@@ -102,8 +104,14 @@ depthchart <- function(tm, year = 2025, week = 1){
     "-12-25", "-01-01"
   )
 
+  today <- paste0("-", format(Sys.Date(), "%m-%d"))
+
 
   game_date <- game_dates[week]
+
+  if (isTRUE(offseason)) {
+    game_date <- today
+  }
 
   baseteamchart <- nflreadr::load_depth_charts(year) |>
     dplyr::mutate(as_of_date = as.Date(dt)) |>
@@ -2099,6 +2107,8 @@ simulate_yards_gained <- function(posstm, deftm, down, togo, YdsBef, posstmdiff,
 #'   determines the active rosters, depth charts, and player PFF grades used
 #'   during the simulation.
 #'
+#' @param offseason Logical. Indicates if it is currently the NFL offseason.
+#'
 #' @param track Logical. If \code{TRUE}, the simulated play-by-play is printed
 #'   to the console as the game progresses. If \code{FALSE} (default), no
 #'   play-by-play output is displayed.
@@ -2127,7 +2137,9 @@ simulate_yards_gained <- function(posstm, deftm, down, togo, YdsBef, posstmdiff,
 #' generated that can be used for downstream analysis or visualization.
 #'
 #' @export
-simulate_game <- function(team1, team2, year = 2025, week = 1, track = FALSE,
+simulate_game <- function(team1, team2, year = 2025, week = 1,
+                          offseason = FALSE,
+                          track = FALSE,
                           create_data = FALSE) {
 
   data_env <- get_data_env()
@@ -2803,6 +2815,8 @@ simulate_game <- function(team1, team2, year = 2025, week = 1, track = FALSE,
 #'   determines the active rosters, depth charts, and player PFF grades used
 #'   during the simulation.
 #'
+#' @param offseason Logical. Indicates if it is currently the NFL offseason
+#'
 #' @param n Integer. Number of game simulations to perform. The default is
 #'   \code{100}.
 #'
@@ -2832,6 +2846,7 @@ simulate_game <- function(team1, team2, year = 2025, week = 1, track = FALSE,
 #'
 #' @export
 multiple_simulations <- function(team1, team2, year = 2025, week = 1,
+                                 offseason = FALSE,
                                  n = 100, max_attempts = 3) {
   resultlist <- vector("list", n)
   successful_runs <- 0
@@ -2891,26 +2906,58 @@ multiple_simulations <- function(team1, team2, year = 2025, week = 1,
   )
 }
 
-# whole_week_simulations <- function(year, weeknum, tm1vec = c(), tm2vec = c()){
-#   if(is_empty(tm1vec) & is_empty(tm2vec)){
-#     weekdf <- nflreadr::load_schedules() |>
-#       filter(season == year & week == weeknum) |>
-#       select(season, week, away_team, home_team)
-#     tm1 <- weekdf$away_team
-#     tm2 <- weekdf$home_team
-#   } else{
-#     tm1 <- tm1vec
-#     tm2 <- tm2vec
-#   }
-#   all_simulations <- list()
-#   for(i in 1:length(tm1)){
-#     print(paste0("Team 1: ", tm1[i], " vs. Team 2: ", tm2[i]))
-#     simulation <- multiple_simulations(team1 = tm1[i], team2 = tm2[i])
-#     all_simulations <- list.append(all_simulations, simulation)
-#     print(simulation)
-#   }
-#   all_simulations
-# }
+
+#' Simulate a full NFL week
 #'
+#' Runs multiple simulations for every game in a given NFL week. By default,
+#' the matchups are pulled from the NFL schedule using the given year and week.
+#' Custom matchup vectors can also be supplied.
 #'
+#' @param year A year between 2022 and 2025.
+#' @param weeknum A week number between 1 and 18.
+#' @param tm1vec Optional vector of team abbreviations for the first team in each matchup.
+#' @param tm2vec Optional vector of team abbreviations for the second team in each matchup.
+#' @param offseason Logical. Indicates if it is currently the NFL offseason.
+#' @param sims Numeric. Must be a positive integer. Sets number of simulations desired
+#' for each matchup.
+#'
+#' @return A list where each element contains the output from
+#'   \code{multiple_simulations()} for one matchup.
+#'
+#' @examples
+#' \dontrun{
+#' whole_week_simulations(year = 2025, weeknum = 1)
+#'
+#' whole_week_simulations(
+#'   year = 2025,
+#'   weeknum = 1,
+#'   tm1vec = c("DAL", "KC"),
+#'   tm2vec = c("PHI", "BUF")
+#' )
+#' }
+#'
+#' @export
+whole_week_simulations <- function(year, weeknum, tm1vec = c(), tm2vec = c(),
+                                   offseason = FALSE,
+                                   sims = 100){
+  if(is_empty(tm1vec) & is_empty(tm2vec)){
+    weekdf <- nflreadr::load_schedules() |>
+      filter(season == year & week == weeknum) |>
+      select(season, week, away_team, home_team)
+    tm1 <- weekdf$away_team
+    tm2 <- weekdf$home_team
+  } else{
+    tm1 <- tm1vec
+    tm2 <- tm2vec
+  }
+  all_simulations <- list()
+  for(i in 1:length(tm1)){
+    print(paste0("Team 1: ", tm1[i], " vs. Team 2: ", tm2[i]))
+    simulation <- multiple_simulations(team1 = tm1[i], team2 = tm2[i], n = sims)
+    all_simulations <- list.append(all_simulations, simulation)
+    print(simulation)
+  }
+  all_simulations
+}
+
 

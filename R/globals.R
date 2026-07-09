@@ -16,5 +16,6 @@ utils::globalVariables(c(
   "mean_coverage_defense1", "mean_run_defense1",
   "sd_rush", "sd_rec", "sd_pass_block",
   "sd_run_block", "sd_pass_rush_defense",
-  "sd_coverage_defense", "sd_run_defense"
+  "sd_coverage_defense", "sd_run_defense", "season", "week",
+  "away_team", "home_team"
 ))

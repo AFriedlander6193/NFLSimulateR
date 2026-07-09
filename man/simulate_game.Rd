@@ -9,6 +9,7 @@ simulate_game(
   team2,
   year = 2025,
   week = 1,
+  offseason = FALSE,
   track = FALSE,
   create_data = FALSE
 )
@@ -42,6 +43,8 @@ Must be different from \code{team1}.}
 Must be an integer between \code{1} and \code{18}. The specified week
 determines the active rosters, depth charts, and player PFF grades used
 during the simulation.}
+
+\item{offseason}{Logical. Indicates if it is currently the NFL offseason.}
 
 \item{track}{Logical. If \code{TRUE}, the simulated play-by-play is printed
 to the console as the game progresses. If \code{FALSE} (default), no

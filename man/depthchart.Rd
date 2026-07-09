@@ -4,7 +4,7 @@
 \alias{depthchart}
 \title{Get an NFL Team Depth Chart}
 \usage{
-depthchart(tm, year = 2025, week = 1)
+depthchart(tm, year = 2025, week = 1, offseason = FALSE)
 }
 \arguments{
 \item{tm}{Character string. A two- or three-letter NFL team abbreviation.
@@ -22,6 +22,8 @@ Must be one of the following:
 
 \item{week}{Numeric. Week of the regular season. Must be an integer
 between \code{1} and \code{18}.}
+
+\item{offseason}{Logical. Indicates if it is currently the NFL offseason}
 }
 \value{
 A data.frame with one row per player on the team's depth chart.
