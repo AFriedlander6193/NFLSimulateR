@@ -2939,7 +2939,7 @@ multiple_simulations <- function(team1, team2, year = 2025, week = 1,
 #' @export
 whole_week_simulations <- function(year, weeknum, tm1vec = c(), tm2vec = c(),
                                    offseason = FALSE,
-                                   sims = 100){
+                                   sims = 250){
   if(is_empty(tm1vec) & is_empty(tm2vec)){
     weekdf <- nflreadr::load_schedules() |>
       filter(season == year & week == weeknum) |>

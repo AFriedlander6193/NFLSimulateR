@@ -10,7 +10,7 @@ whole_week_simulations(
   tm1vec = c(),
   tm2vec = c(),
   offseason = FALSE,
-  sims = 100
+  sims = 250
 )
 }
 \arguments{
